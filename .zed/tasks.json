@@ -1,0 +1,10 @@
+[
+    {
+        "label": "Run python server",
+        "command": "uv",
+        "args": ["run", "hypercorn", "app.main:app", "--reload", "--bind", "0.0.0.0:8000"],
+        "use_new_terminal": false,
+        "allow_concurrent_runs": false,
+        "reveal": "always"
+    }
+]

@@ -1,0 +1,20 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run python server",
+      "type": "shell",
+      "command": "uv",
+      "args": [
+        "run",
+        "hypercorn",
+        "app.main:app",
+        "--reload",
+        "--bind",
+        "0.0.0.0:8000"
+      ],
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}
