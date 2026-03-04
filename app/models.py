@@ -4,10 +4,10 @@ from pydantic import BaseModel
 
 
 class ScheduleEntry(BaseModel):
-    time: date
+    date: date
     subGroup: str | None = None
-    start: time
-    end: time
+    start: time | None = None
+    end: time | None = None
     subject: str
     type: str
     teacher: list[str]
