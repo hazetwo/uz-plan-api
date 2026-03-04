@@ -27,7 +27,7 @@ async def root() -> Dict[str, str]:
 
 # @app.get("/schedule")
 # async def schedule(
-#     url: str, client: httpx.AsyncClient = Depends(get_http_client)
+#     url: str, client: HttpClient
 # ):
 #     soup = await fetch_schedule(url, client)
 #     return str(soup)
