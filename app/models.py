@@ -17,3 +17,8 @@ class ScheduleEntry(BaseModel):
     type: str
     teacher: list[str]
     room: str | None = None
+
+
+class Group(BaseModel):
+    name: str
+    id: str

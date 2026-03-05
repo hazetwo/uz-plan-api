@@ -3,7 +3,11 @@ from datetime import date
 import pytest
 
 from app.core.exceptions import ParsingException
-from app.utils import get_week_end, parse_date, parse_time
+from app.utils import (
+    get_week_end,
+    parse_date,
+    parse_time,
+)
 
 
 def test_parse_date():

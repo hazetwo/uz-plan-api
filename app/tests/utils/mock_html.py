@@ -1,4 +1,4 @@
-MOCK_HTML = """
+MOCK_SCHEDULE_HTML = """
 <table id="table_details" class="table table-bordered table-condensed">
     <tbody>
         <tr class="gray">
@@ -139,4 +139,14 @@ MOCK_HTML = """
         </tr>
     </tbody>
 </table>
+"""
+
+MOCK_GROUP_HTML = """
+<TABLE class="table table-bordered table-condensed">
+      <TR class="odd"><td><a href="grupy_plan.php?ID=30551">11INF-SD(L) Informatyka / stacjonarne / drugiego stopnia z tyt. magistra inżyniera</a></td></tr>
+      <TR class="even"><td><a href="grupy_plan.php?ID=30552">11INF-SP Informatyka / stacjonarne / pierwszego stopnia z tyt. inżyniera</a></td></tr>
+      <TR class="odd"><td><a href="grupy_plan.php?ID=30553">12INF-SD(L) Informatyka / stacjonarne / drugiego stopnia z tyt. magistra inżyniera</a></td></tr>
+      <TR class="even"><td><a href="grupy_plan.php?ID=30554">12INF-SP Informatyka / stacjonarne / pierwszego stopnia z tyt. inżyniera</a></td></tr>
+      <TR class="odd"><td><a href="grupy_plan.php?ID=30555">13INF-SP Informatyka / stacjonarne / pierwszego stopnia z tyt. inżyniera</a></td></tr>
+</TABLE>
 """
