@@ -20,7 +20,7 @@ async def get_entries(id: str, client: HttpClient) -> List[ScheduleEntry]:
     return schedules_entries
 
 
-@router.get("by-day")
+@router.get("/by-day")
 async def get_entry(id: str, date: date, client: HttpClient):
     soup = await fetch_schedule(id, client)
     schedule_entries = parse_schedule(soup)

@@ -16,7 +16,6 @@ dependencies = [
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["app/api/tests"]
 pythonpath = ["."]
 
 [dependency-groups]
