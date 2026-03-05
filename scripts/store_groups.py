@@ -5,11 +5,11 @@ from pathlib import Path
 import httpx
 from bs4 import BeautifulSoup
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-
 from app.config.settings import settings
 from app.core.parser import parse_groups
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 
 
 def main() -> int:

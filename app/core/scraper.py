@@ -1,7 +1,11 @@
+import json
+
 import httpx
 from bs4 import BeautifulSoup
 
+from app.config.settings import settings
 from app.core.exceptions import FetchScheduleException, UrlNotFoundException
+from app.models import Group
 
 
 async def async_fetch(
@@ -18,12 +22,29 @@ async def async_fetch(
     return BeautifulSoup(response.text, "html.parser")
 
 
-async def fetch_schedule(url: str, client: httpx.AsyncClient) -> BeautifulSoup:
+async def fetch_schedule(id: str, client: httpx.AsyncClient) -> BeautifulSoup:
+    url = get_url_by_id(id)
+
     if url is None:
         raise UrlNotFoundException(
             "The provided ID does not map to a valid URL."
         )
 
-    soup = await async_fetch(httpx.URL(url), client)
+    soup = await async_fetch(url, client)
 
     return soup
+
+
+def get_url_by_id(id: str) -> httpx.URL | None:
+    with settings.GROUPS_FILE.open("r", encoding="utf-8") as file:
+        data = json.load(file)
+
+    groups = [Group.model_validate(item) for item in data]
+
+    for group in groups:
+        if group.id == id:
+            return httpx.URL(
+                f"https://plan.uz.zgora.pl/grupy_plan.php?ID={id}"
+            )
+
+    return None

@@ -5,6 +5,7 @@ from typing_extensions import Dict
 
 from app.api.main import api_router
 from app.config.settings import settings
+from app.core.handlers import register_exception_handlers
 from app.core.http_client import create_http_client
 
 
@@ -28,3 +29,4 @@ async def root() -> Dict[str, str]:
 
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
+register_exception_handlers(app)

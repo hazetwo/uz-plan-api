@@ -16,6 +16,7 @@ router = APIRouter(prefix="/schedule", tags=["items"])
 async def get_entries(id: str, client: HttpClient) -> List[ScheduleEntry]:
     soup = await fetch_schedule(id, client)
     schedules_entries = parse_schedule(soup)
+
     return schedules_entries
 
 
