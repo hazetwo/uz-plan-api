@@ -1,7 +1,7 @@
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 
-from app.api.core.exceptions import ParsingException, ScheduleFetchException
+from app.core.exceptions import ParsingException, ScheduleFetchException
 
 
 async def schedule_fetch_exception_handler(

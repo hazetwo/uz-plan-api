@@ -1,7 +1,7 @@
 import httpx
 from bs4 import BeautifulSoup
 
-from app.api.core.exceptions import ScheduleFetchException
+from app.core.exceptions import ScheduleFetchException
 
 
 async def fetch_schedule(url: str, client: httpx.AsyncClient) -> BeautifulSoup:

@@ -1,6 +1,6 @@
 import pytest
 
-from app.api.core.scraper import fetch_schedule
+from app.core.scraper import fetch_schedule
 
 
 @pytest.mark.asyncio

@@ -7,6 +7,8 @@
             "hypercorn",
             "app.main:app",
             "--reload",
+            "--log-level",
+            "info",
             "--bind",
             "0.0.0.0:8000",
         ],
