@@ -25,7 +25,7 @@ def to_monday(date: date) -> date:
     return date - timedelta(days=date.weekday())
 
 
-def get_week_end(week_start: date) -> date:
-    week_start = to_monday(week_start)
+def get_week_end(date: date) -> date:
+    date = to_monday(date)
 
-    return week_start + timedelta(days=6)
+    return date + timedelta(days=6)
