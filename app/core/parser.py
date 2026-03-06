@@ -3,7 +3,7 @@ from typing import List
 from bs4 import BeautifulSoup
 from pydantic import ValidationError
 
-from app.core.exceptions import ParsingException
+from app.core.handlers.exceptions import ParsingException
 from app.models import Group, ScheduleEntry
 from app.utils.date import parse_date, parse_time
 

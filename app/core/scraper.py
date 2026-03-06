@@ -1,7 +1,10 @@
 import httpx
 from bs4 import BeautifulSoup
 
-from app.core.exceptions import FetchScheduleException, UrlNotFoundException
+from app.core.handlers.exceptions import (
+    FetchScheduleException,
+    UrlNotFoundException,
+)
 from app.utils.id import get_url_by_id
 
 

@@ -1,6 +1,6 @@
 from datetime import date, datetime, time, timedelta
 
-from app.core.exceptions import ParsingException
+from app.core.handlers.exceptions import ParsingException
 
 
 def parse_date(value: str | None) -> date | None:
