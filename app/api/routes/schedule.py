@@ -1,7 +1,7 @@
 from datetime import date
 from typing import List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 
 from app.api.deps import HttpClient
 from app.core.parser import parse_schedule
@@ -12,37 +12,46 @@ from app.utils.date import get_week_end
 router = APIRouter(prefix="/schedule", tags=["schedule"])
 
 
-@router.get("/")
-async def get_entries(id: str, client: HttpClient) -> List[ScheduleEntry]:
-    soup = await fetch_schedule(id, client)
+async def get_schedule(
+    id: str, request: Request, client: HttpClient
+) -> List[ScheduleEntry]:
+    groups_data = request.app.state.groups
+    soup = await fetch_schedule(id, groups_data, client)
     schedules_entries = parse_schedule(soup)
-
+    # Push date=null to the bottom of the list
+    schedules_entries.sort(key=lambda entry: (entry.date is None, entry.date))
     return schedules_entries
 
 
+@router.get("/")
+async def get_entries(
+    id: str, request: Request, client: HttpClient
+) -> List[ScheduleEntry]:
+    return await get_schedule(id, request, client)
+
+
 @router.get("/by-day")
-async def get_entry(id: str, date: date, client: HttpClient):
-    soup = await fetch_schedule(id, client)
-    schedule_entries = parse_schedule(soup)
-    day_entries: List[ScheduleEntry] = []
-    for entry in schedule_entries:
-        if date == entry.date:
-            day_entries.append(entry)
+async def get_entry_by_day(
+    id: str, request: Request, date: date, client: HttpClient
+) -> List[ScheduleEntry]:
+    schedule_entries = await get_schedule(id, request, client)
+    day_entries: List[ScheduleEntry] = [
+        entry for entry in schedule_entries if date == entry.date
+    ]
 
     return day_entries
 
 
 @router.get("/by-week")
-async def get_week_entries(
-    id: str, date: date, client: HttpClient
+async def get_entries_by_week(
+    id: str, date: date, request: Request, client: HttpClient
 ) -> List[ScheduleEntry]:
-    soup = await fetch_schedule(id, client)
-    schedule_entries = parse_schedule(soup)
-    week_entries: List[ScheduleEntry] = []
+    schedule_entries = await get_schedule(id, request, client)
     week_end = get_week_end(date)
-
-    for entry in schedule_entries:
-        if date <= entry.date <= week_end:
-            week_entries.append(entry)
+    week_entries: List[ScheduleEntry] = [
+        entry
+        for entry in schedule_entries
+        if entry.date is not None and date <= entry.date <= week_end
+    ]
 
     return week_entries

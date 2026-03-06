@@ -3,7 +3,9 @@ from datetime import date, datetime, time, timedelta
 from app.core.exceptions import ParsingException
 
 
-def parse_date(value: str) -> date:
+def parse_date(value: str | None) -> date | None:
+    if not value:
+        return None
     value = value.strip()
     try:
         return datetime.fromisoformat(value).date()
@@ -12,7 +14,7 @@ def parse_date(value: str) -> date:
 
 
 def parse_time(value: str | None) -> time | None:
-    if value is None:
+    if not value:
         return None
     value = value.strip()
     try:

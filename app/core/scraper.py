@@ -19,8 +19,10 @@ async def async_fetch(
     return BeautifulSoup(response.text, "html.parser")
 
 
-async def fetch_schedule(id: str, client: httpx.AsyncClient) -> BeautifulSoup:
-    url = get_url_by_id(id)
+async def fetch_schedule(
+    id: str, data, client: httpx.AsyncClient
+) -> BeautifulSoup:
+    url = get_url_by_id(id, data)
 
     if url is None:
         raise UrlNotFoundException(

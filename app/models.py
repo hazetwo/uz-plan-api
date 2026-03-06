@@ -1,4 +1,5 @@
-from datetime import date, time
+from datetime import date as Date
+from datetime import time as Time
 
 from pydantic import BaseModel
 
@@ -9,10 +10,10 @@ from pydantic import BaseModel
 # It might be the case that an administrator
 # can insert it without required values.
 class ScheduleEntry(BaseModel):
-    date: date
+    date: Date | None = None
     subGroup: str | None = None
-    start: time | None = None
-    end: time | None = None
+    start: Time | None = None
+    end: Time | None = None
     subject: str
     type: str
     teacher: list[str]

@@ -17,17 +17,16 @@ def parse_schedule(soup: BeautifulSoup) -> List[ScheduleEntry]:
 
     for row in table.find_all("tr"):
         cells = [cell.text.strip() for cell in row.find_all("td")]
-
-        if len(cells) < 8:
+        if len(cells) < 9:
             continue
 
         try:
             entry = ScheduleEntry(
                 date=parse_date(cells[0]),
                 # Skipping day
-                subGroup=cells[2] or None,
-                start=parse_time(cells[3]) or None,
-                end=parse_time(cells[4]) or None,
+                subGroup=cells[2],
+                start=parse_time(cells[3]),
+                end=parse_time(cells[4]),
                 subject=cells[5],
                 type=cells[6],
                 # I've seen once multiple teachers added to the same exam

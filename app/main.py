@@ -1,3 +1,4 @@
+import json
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -11,6 +12,8 @@ from app.core.handlers import register_exception_handlers
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    with settings.GROUPS_FILE.open("r", encoding="utf-8") as file:
+        app.state.groups = json.load(file)
     async with create_http_client() as client:
         app.state.http = client
         yield
