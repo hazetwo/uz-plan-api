@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 
 from app.core.parser import parse_groups, parse_schedule
 from app.models import Group, ScheduleEntry
-from tests.utils.mock_html import MOCK_GROUP_HTML, MOCK_SCHEDULE_HTML
+from tests.mocks.mock_html import MOCK_GROUP_HTML, MOCK_SCHEDULE_HTML
 
 
 def test_schedule_parser():

@@ -7,9 +7,9 @@ from app.api.deps import HttpClient
 from app.core.parser import parse_schedule
 from app.core.scraper import fetch_schedule
 from app.models import ScheduleEntry
-from app.utils import get_week_end
+from app.utils.date import get_week_end
 
-router = APIRouter(prefix="/schedule", tags=["items"])
+router = APIRouter(prefix="/schedule", tags=["schedule"])
 
 
 @router.get("/")

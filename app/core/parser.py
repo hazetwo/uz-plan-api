@@ -5,7 +5,7 @@ from pydantic import ValidationError
 
 from app.core.exceptions import ParsingException
 from app.models import Group, ScheduleEntry
-from app.utils import parse_date, parse_time
+from app.utils.date import parse_date, parse_time
 
 
 def parse_schedule(soup: BeautifulSoup) -> List[ScheduleEntry]:
