@@ -7,7 +7,7 @@ from typing_extensions import Dict
 from app.api.main import api_router
 from app.clients.http_client import create_http_client
 from app.config.settings import settings
-from app.core.handlers import register_exception_handlers
+from app.core.handlers.handlers import register_exception_handlers
 
 
 @asynccontextmanager
