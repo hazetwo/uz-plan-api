@@ -17,3 +17,7 @@ def test_get_url_by_id():
 
 def test_get_url_by_id_none():
     assert get_url_by_id("34328", MOCK_DATA) is None
+
+
+def test_get_url_by_id_invalid():
+    assert get_url_by_id("invalid", MOCK_DATA) is None
