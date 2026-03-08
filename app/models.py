@@ -14,12 +14,12 @@ class ScheduleEntry(BaseModel):
     subGroup: str | None = None
     start: Time | None = None
     end: Time | None = None
-    subject: str
-    type: str
+    subject: str | None = None
+    type: str | None = None
     teacher: list[str]
     room: str | None = None
 
 
 class Group(BaseModel):
     name: str
-    id: str
+    group_id: str

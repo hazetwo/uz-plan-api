@@ -11,7 +11,7 @@ def get_url_by_id(id: str, groups_data) -> httpx.URL | None:
     groups = [Group.model_validate(item) for item in groups_data]
 
     for group in groups:
-        if group.id == id:
+        if group.group_id == id:
             return httpx.URL(f"{settings.SCHEDULE_LINK}{id}")
 
     return None

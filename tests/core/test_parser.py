@@ -1,10 +1,17 @@
 import datetime
 
+import pytest
 from bs4 import BeautifulSoup
 
+from app.core.handlers.exceptions import ParsingException
 from app.core.parser import parse_groups, parse_schedule
 from app.models import Group, ScheduleEntry
-from tests.mocks.mock_html import MOCK_GROUP_HTML, MOCK_SCHEDULE_HTML
+from tests.mocks.mock_html import (
+    INVALID_MOCK_GROUP_HTML,
+    INVALID_MOCK_SCHEDULE,
+    MOCK_GROUP_HTML,
+    MOCK_SCHEDULE_HTML,
+)
 
 
 def test_schedule_parser():
@@ -46,15 +53,51 @@ def test_schedule_parser():
     assert parse_schedule(soup) == expected
 
 
+def test_schedule_parser_none_table():
+    soup = BeautifulSoup(
+        """
+    <html></html>
+    """,
+        features="html.parser",
+    )
+
+    with pytest.raises(ParsingException):
+        parse_schedule(soup)
+
+
+def test_schedule_parser_invalid_table():
+    soup = BeautifulSoup(
+        INVALID_MOCK_SCHEDULE,
+        features="html.parser",
+    )
+
+    with pytest.raises(ParsingException):
+        parse_schedule(soup)
+
+
 def test_groups_parser():
     soup = BeautifulSoup(MOCK_GROUP_HTML, "html.parser")
 
     expected = [
-        Group(name="11INF-SD(L)", id="30551"),
-        Group(name="11INF-SP", id="30552"),
-        Group(name="12INF-SD(L)", id="30553"),
-        Group(name="12INF-SP", id="30554"),
-        Group(name="13INF-SP", id="30555"),
+        Group(name="11INF-SD(L)", group_id="30551"),
+        Group(name="11INF-SP", group_id="30552"),
+        Group(name="12INF-SD(L)", group_id="30553"),
+        Group(name="12INF-SP", group_id="30554"),
+        Group(name="13INF-SP", group_id="30555"),
     ]
 
     assert parse_groups(soup) == expected
+
+
+def test_groups_parser_none_table():
+    soup = BeautifulSoup("<html></html>", "html.parser")
+
+    with pytest.raises(ParsingException):
+        parse_groups(soup)
+
+
+def test_groups_parser_none_id():
+    soup = BeautifulSoup(INVALID_MOCK_GROUP_HTML, "html.parser")
+
+    with pytest.raises(ParsingException):
+        parse_groups(soup)

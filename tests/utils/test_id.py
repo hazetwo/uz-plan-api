@@ -4,8 +4,8 @@ from app.config.settings import settings
 from app.utils.id import get_url_by_id
 
 MOCK_DATA = [
-    {"id": "30560", "name": "INF1"},
-    {"id": "30561", "name": "INF2"},
+    {"group_id": "30560", "name": "INF1"},
+    {"group_id": "30561", "name": "INF2"},
 ]
 
 
