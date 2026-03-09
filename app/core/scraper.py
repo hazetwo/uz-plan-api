@@ -14,10 +14,10 @@ async def async_fetch(
     try:
         response = await client.get(url)
         response.raise_for_status()
-    except httpx.RequestError as exc:
-        raise FetchScheduleException(f"Request error: {exc}")
     except httpx.HTTPStatusError as exc:
         raise FetchScheduleException(f"HTTP error: {exc}")
+    except httpx.RequestError as exc:
+        raise FetchScheduleException(f"Request error: {exc}")
 
     return BeautifulSoup(response.text, "html.parser")
 
