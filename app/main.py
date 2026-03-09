@@ -2,9 +2,9 @@ import json
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from typing_extensions import Dict
 
 from app.api.main import api_router
+from app.api.routes import health
 from app.clients.http_client import create_http_client
 from app.config.settings import settings
 from app.core.handlers.handlers import register_exception_handlers
@@ -25,11 +25,8 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
 )
 
-
-@app.get("/")
-async def root() -> Dict[str, str]:
-    return {"status": "ok"}
-
-
 app.include_router(api_router, prefix=settings.API_V1_STR)
+app.include_router(health.router)
+
+
 register_exception_handlers(app)
