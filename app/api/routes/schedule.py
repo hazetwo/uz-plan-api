@@ -15,7 +15,7 @@ router = APIRouter(prefix="/schedule", tags=["schedule"])
 async def get_schedule(
     id: str, request: Request, client: HttpClient
 ) -> List[ScheduleEntry]:
-    groups_data = request.app.state.groups
+    groups_data: list[dict] = request.app.state.groups
     soup = await fetch_schedule(id, groups_data, client)
     schedules_entries = parse_schedule(soup)
     # Push date=null to the bottom of the list
