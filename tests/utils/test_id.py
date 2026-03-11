@@ -1,6 +1,8 @@
 import httpx
+import pytest
 
 from app.config.settings import settings
+from app.core.handlers.exceptions import UrlNotFoundException
 from app.utils.id import get_url_by_id
 
 MOCK_DATA = [
@@ -16,8 +18,10 @@ def test_get_url_by_id():
 
 
 def test_get_url_by_id_none():
-    assert get_url_by_id("34328", MOCK_DATA) is None
+    with pytest.raises(UrlNotFoundException):
+        get_url_by_id("34328", MOCK_DATA)
 
 
 def test_get_url_by_id_invalid():
-    assert get_url_by_id("invalid", MOCK_DATA) is None
+    with pytest.raises(UrlNotFoundException):
+        get_url_by_id("invalid", MOCK_DATA)
