@@ -8,12 +8,14 @@ from app.api.routes import health
 from app.clients.http_client import create_http_client
 from app.config.settings import settings
 from app.core.handlers.handlers import register_exception_handlers
+from app.models import Group
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     with settings.GROUPS_FILE.open("r", encoding="utf-8") as file:
-        app.state.groups = json.load(file)
+        raw_groups = json.load(file)
+    app.state.groups = [Group.model_validate(g) for g in raw_groups]
     async with create_http_client() as client:
         app.state.http = client
         yield

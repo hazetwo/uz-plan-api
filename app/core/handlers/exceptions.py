@@ -8,3 +8,7 @@ class ParsingException(Exception):
 
 class UrlNotFoundException(Exception):
     pass
+
+
+class GroupsDataException(Exception):
+    pass

@@ -1,86 +1,82 @@
 [
   {
     "name": "11INF-SD(L)",
-    "id": "30551"
+    "group_id": "30551"
   },
   {
     "name": "11INF-SP",
-    "id": "30552"
+    "group_id": "30552"
   },
   {
     "name": "12INF-SD(L)",
-    "id": "30553"
+    "group_id": "30553"
   },
   {
     "name": "12INF-SP",
-    "id": "30554"
+    "group_id": "30554"
   },
   {
     "name": "13INF-SP",
-    "id": "30555"
+    "group_id": "30555"
   },
   {
     "name": "21INF-IK-SD(L)",
-    "id": "30557"
+    "group_id": "30557"
   },
   {
     "name": "21INF-SP",
-    "id": "30558"
+    "group_id": "30558"
   },
   {
     "name": "22INF-ISI-SD(L)",
-    "id": "30559"
+    "group_id": "30559"
   },
   {
     "name": "22INF-SP",
-    "id": "30560"
+    "group_id": "30560"
   },
   {
     "name": "23INF-SP",
-    "id": "30561"
+    "group_id": "30561"
   },
   {
     "name": "31INF-PSI-SP",
-    "id": "30562"
+    "group_id": "30562"
   },
   {
     "name": "32INF-ISM-SP",
-    "id": "30563"
+    "group_id": "30563"
   },
   {
     "name": "33INF-SSI-SP",
-    "id": "30564"
+    "group_id": "30564"
   },
   {
     "name": "34INF-SSI-SP",
-    "id": "30565"
+    "group_id": "30565"
   },
   {
     "name": "11INF-ND(L)",
-    "id": "30584"
+    "group_id": "30584"
   },
   {
     "name": "11INF-NP",
-    "id": "30585"
-  },
-  {
-    "name": "12INF-ND(L)",
-    "id": "30586"
+    "group_id": "30585"
   },
   {
     "name": "12INF-NP",
-    "id": "30587"
+    "group_id": "30587"
   },
   {
     "name": "21INF-NP",
-    "id": "30588"
+    "group_id": "30588"
   },
   {
     "name": "21INF-ZSI-ND(L)",
-    "id": "30589"
+    "group_id": "30589"
   },
   {
     "name": "31INF-ISM-NP",
-    "id": "30590"
+    "group_id": "30590"
   }
 ]

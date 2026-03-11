@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
+
+from app.api.deps import Groups
 
 router = APIRouter(prefix="/groups", tags=["groups"])
 
 
 @router.get("/")
-def get_groups(request: Request):
-    return request.app.state.groups
+def get_groups(groups_data: Groups):
+    return groups_data

@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from app.core.handlers.exceptions import (
     FetchScheduleException,
 )
+from app.models import Group
 from app.utils.id import get_url_by_id
 
 
@@ -22,9 +23,9 @@ async def async_fetch(
 
 
 async def fetch_schedule(
-    id: str, data: list[dict], client: httpx.AsyncClient
+    id: str, groups_data: list[Group], client: httpx.AsyncClient
 ) -> BeautifulSoup:
-    url = get_url_by_id(id, data)
+    url = get_url_by_id(id, groups_data)
 
     soup = await async_fetch(url, client)
 
