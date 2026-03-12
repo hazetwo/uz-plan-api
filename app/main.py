@@ -15,7 +15,8 @@ from app.models import Group
 async def lifespan(app: FastAPI):
     with settings.GROUPS_FILE.open("r", encoding="utf-8") as file:
         raw_groups = json.load(file)
-    app.state.groups = [Group.model_validate(g) for g in raw_groups]
+    groups_data = [Group.model_validate(g) for g in raw_groups]
+    app.state.groups_by_id = {g.group_id: g for g in groups_data}
     async with create_http_client() as client:
         app.state.http = client
         yield

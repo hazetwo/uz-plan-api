@@ -7,4 +7,4 @@ router = APIRouter(prefix="/groups", tags=["groups"])
 
 @router.get("/")
 def get_groups(groups_data: Groups):
-    return groups_data
+    return list(groups_data.values())

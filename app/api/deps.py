@@ -11,10 +11,10 @@ def get_http_client(request: Request) -> httpx.AsyncClient:
     return client
 
 
-def get_groups_data(request: Request) -> list[Group]:
-    groups_data: list[Group] = request.app.state.groups
+def get_groups_data(request: Request) -> dict[str, Group]:
+    groups_data: dict[str, Group] = request.app.state.groups_by_id
     return groups_data
 
 
 HttpClient = Annotated[httpx.AsyncClient, Depends(get_http_client)]
-Groups = Annotated[list[Group], Depends(get_groups_data)]
+Groups = Annotated[dict[str, Group], Depends(get_groups_data)]

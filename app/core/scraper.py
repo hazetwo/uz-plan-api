@@ -23,7 +23,7 @@ async def async_fetch(
 
 
 async def fetch_schedule(
-    id: str, groups_data: list[Group], client: httpx.AsyncClient
+    id: str, groups_data: dict[str, Group], client: httpx.AsyncClient
 ) -> BeautifulSoup:
     url = get_url_by_id(id, groups_data)
 
