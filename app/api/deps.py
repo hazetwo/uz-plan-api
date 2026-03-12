@@ -1,8 +1,9 @@
 from typing import Annotated
 
 import httpx
-from fastapi import Depends, Request
+from fastapi import Depends, Query, Request
 
+from app.config.settings import settings
 from app.models import Group
 
 
@@ -18,3 +19,12 @@ def get_groups_data(request: Request) -> dict[str, Group]:
 
 HttpClient = Annotated[httpx.AsyncClient, Depends(get_http_client)]
 Groups = Annotated[dict[str, Group], Depends(get_groups_data)]
+GroupId = Annotated[
+    str,
+    Query(
+        min_length=1,
+        max_length=settings.LONGEST_ID,
+        pattern=r"^\d+$",
+        description=f"Numeric group ID, max {settings.LONGEST_ID} digits",
+    ),
+]
