@@ -3,12 +3,14 @@ import pytest
 
 from app.config.settings import settings
 from app.core.handlers.exceptions import UrlNotFoundException
+from app.models import Group
 from app.utils.id import get_url_by_id
 
-MOCK_DATA = [
+raw_mock = [
     {"group_id": "30560", "name": "INF1"},
     {"group_id": "30561", "name": "INF2"},
 ]
+MOCK_DATA = [Group.model_validate(g) for g in raw_mock]
 
 
 def test_get_url_by_id():
