@@ -6,7 +6,7 @@ class ParsingException(Exception):
     pass
 
 
-class UrlNotFoundException(Exception):
+class UrlException(Exception):
     pass
 
 

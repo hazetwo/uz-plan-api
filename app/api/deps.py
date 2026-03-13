@@ -4,6 +4,7 @@ import httpx
 from fastapi import Depends, Query, Request
 
 from app.config.settings import settings
+from app.core.handlers.exceptions import GroupsDataException
 from app.models import Group
 
 
@@ -14,6 +15,8 @@ def get_http_client(request: Request) -> httpx.AsyncClient:
 
 def get_groups_data(request: Request) -> dict[str, Group]:
     groups_data: dict[str, Group] = request.app.state.groups_by_id
+    if groups_data is None:
+        raise GroupsDataException("Groups data not found")
     return groups_data
 
 

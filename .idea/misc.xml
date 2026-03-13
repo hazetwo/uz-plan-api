@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Black">
+    <option name="pathToExecutable" value="/opt/homebrew/bin/black" />
     <option name="sdkName" value="uv (uz-plan-api)" />
+  </component>
+  <component name="RuffConfiguration">
+    <option name="enabled" value="true" />
   </component>
 </project>

@@ -50,8 +50,7 @@ def parse_groups(soup: BeautifulSoup) -> List[Group]:
     group_entries: List[Group] = []
 
     for cell in table.find_all("tr"):
-        # Only supports IT for now
-        name = cell.text.split(" Informatyka /")[0].strip()
+        name = cell.text.split(" ")[0].strip()
 
         if not name:
             raise ParsingException(f"Group row: {cell} does not have name")
