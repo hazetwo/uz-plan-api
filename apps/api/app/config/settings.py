@@ -1,3 +1,4 @@
+from os import getenv
 from pathlib import Path
 from typing import ClassVar
 
@@ -6,10 +7,7 @@ from pydantic_settings import BaseSettings
 
 
 class RedisSettings(BaseSettings):
-    HOST: str = "localhost"
-    PORT: int = 6379
-    USERNAME: str | None = None
-    PASSWORD: str | None = None
+    URL: str = getenv("REDIS__URL", "redis://localhost:6379")
 
 
 class Settings(BaseSettings):

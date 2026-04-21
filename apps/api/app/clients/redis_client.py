@@ -6,9 +6,4 @@ RedisClient = redis.Redis
 
 
 def create_redis_client() -> RedisClient:
-    return RedisClient(
-        host=settings.redis.HOST,
-        port=settings.redis.PORT,
-        username=settings.redis.USERNAME,
-        password=settings.redis.PASSWORD,
-    )
+    return redis.from_url(settings.redis.URL)
