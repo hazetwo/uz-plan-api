@@ -141,7 +141,7 @@ func (s Scraper) GetScheduleForID(site string, id string) ([]Entry, error) {
 		entries = append(entries, e)
 	})
 
-	if len(errs) < 0 {
+	if len(errs) > 0 {
 		return nil, errors.Join(errs...)
 	}
 
