@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"errors"
+	"log/slog"
 	"net/url"
 	"uz-plan-api/internal/schedule"
 
@@ -32,7 +33,9 @@ func (s Scraper) GetIdsOfFields(site string) []string {
 		ids = append(ids, id)
 	})
 
-	s.c.Visit(site)
+	if err := s.c.Visit(site); err != nil {
+		slog.Warn("Failed to visit: %v", site)
+	}
 	return ids
 }
 
@@ -53,8 +56,9 @@ func (s Scraper) GetGroupsFromId(site string, id string) []string {
 	q := u.Query()
 	q.Set("ID", id)
 	u.RawQuery = q.Encode()
-	s.c.Visit(u.String())
-
+	if err := s.c.Visit(u.String()); err != nil {
+		slog.Warn("Failed to visit: %v", site)
+	}
 	return ids
 }
 
@@ -93,7 +97,9 @@ func (s Scraper) GetScheduleForId(site string, id string) ([]schedule.Entry, err
 	q := u.Query()
 	q.Set("ID", id)
 	u.RawQuery = q.Encode()
-	s.c.Visit(u.String())
+	if err := s.c.Visit(u.String()); err != nil {
+		slog.Warn("Failed to visit: %v", site)
+	}
 
 	if len(errs) > 0 {
 		return nil, errors.Join(errs...)
