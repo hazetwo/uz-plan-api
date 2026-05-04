@@ -17,3 +17,6 @@ test:
 
 clean:
 	rm -f $(BIN)
+
+build-mac:
+	GOARCH=arm64 GOOS=darwin go build -o ./bin/app-macos $(APP)
