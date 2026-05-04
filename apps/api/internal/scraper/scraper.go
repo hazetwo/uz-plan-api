@@ -1,8 +1,9 @@
 package scraper
 
 import (
+	"errors"
 	"net/url"
-	"slices"
+	"uz-plan-api/internal/schedule"
 
 	"github.com/gocolly/colly"
 )
@@ -35,7 +36,7 @@ func (s Scraper) GetIdsOfFields(site string) []string {
 	return ids
 }
 
-func (s Scraper) GetIdsOfGroups(site string, fields []string, supportedIds []string) []string {
+func (s Scraper) GetGroupsFromId(site string, id string) []string {
 	var ids []string
 
 	s.c.OnHTML("table a[href]", func(e *colly.HTMLElement) {
@@ -48,16 +49,55 @@ func (s Scraper) GetIdsOfGroups(site string, fields []string, supportedIds []str
 		ids = append(ids, id)
 	})
 
-	for _, f := range fields {
-		if !slices.Contains(supportedIds, f) {
-			continue
-		}
-		u, _ := url.Parse(site)
-		q := u.Query()
-		q.Set("ID", f)
-		u.RawQuery = q.Encode()
-		s.c.Visit(u.String())
-	}
+	u, _ := url.Parse(site)
+	q := u.Query()
+	q.Set("ID", id)
+	u.RawQuery = q.Encode()
+	s.c.Visit(u.String())
 
 	return ids
+}
+
+func (s Scraper) GetScheduleForId(site string, id string) ([]schedule.Entry, error) {
+	var entries []schedule.Entry
+	var errs []error
+
+	s.c.OnHTML("#table_details tr:has(td)", func(e *colly.HTMLElement) {
+		date := e.ChildText("td:nth-child(1)")
+		_ = e.ChildText("td:nth-child(2)")
+		group := e.ChildText("td:nth-child(3)")
+		start := e.ChildText("td:nth-child(4)")
+		end := e.ChildText("td:nth-child(5)")
+		subject := e.ChildText("td:nth-child(6)")
+		ClassType := e.ChildText("td:nth-child(7)")
+		teacher := e.ChildText("td:nth-child(8)")
+		classroom := e.ChildText("td:nth-child(9)")
+		ent, err := schedule.FromScraper(schedule.RawEntry{
+			Group:     group,
+			Start:     start,
+			End:       end,
+			Date:      date,
+			Subject:   subject,
+			ClassType: ClassType,
+			Teacher:   teacher,
+			Classroom: classroom,
+		})
+		if err != nil {
+			errs = append(errs, err)
+		}
+		entries = append(entries, ent)
+
+	})
+
+	u, _ := url.Parse(site)
+	q := u.Query()
+	q.Set("ID", id)
+	u.RawQuery = q.Encode()
+	s.c.Visit(u.String())
+
+	if len(errs) > 0 {
+		return nil, errors.Join(errs...)
+	}
+
+	return entries, nil
 }
