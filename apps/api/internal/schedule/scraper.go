@@ -63,7 +63,7 @@ func (s Scraper) GetGroupsFromID(site string, id string) map[string]string {
 	return f
 }
 
-func (s Scraper) GetScheduleForId(site string, id string) ([]Entry, error) {
+func (s Scraper) GetScheduleForID(site string, id string) ([]Entry, error) {
 	var entries []Entry
 	var errs []error
 
