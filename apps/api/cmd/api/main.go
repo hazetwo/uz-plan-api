@@ -6,26 +6,24 @@ import (
 	"log"
 	"net/http"
 	"uz-plan-api/internal/database"
+	"uz-plan-api/internal/schedule"
 
 	"github.com/go-chi/chi/v5"
 )
 
 var supported = []string{"401"}
-var uFields = "https://plan.uz.zgora.pl/grupy_lista_kierunkow.php"
-var uGroups = "https://plan.uz.zgora.pl/grupy_lista_grup_kierunku.php"
-var uSchedule = "https://plan.uz.zgora.pl/grupy_plan.php"
 
 func main() {
 	ctx := context.Background()
 
 	r := chi.NewRouter()
 
-	db, err := database.Connect(ctx)
+	rdb, err := database.Connect(ctx)
 	if err != nil {
 		log.Fatal("Failed to connect to Redis:", err)
 	}
 	defer func() {
-		err := db.Close()
+		err := rdb.Close()
 		if err != nil {
 			log.Printf("Failed to close Redis: %v", err)
 		}
@@ -35,8 +33,14 @@ func main() {
 
 	var port = "8080"
 
-	//scr := schedule.NewScraper("plan.uz.zgora.pl")
-	//svc := schedule.NewService(scr)
+	scr := schedule.NewScraper()
+	repo, rs := schedule.NewRedisRepository(rdb)
+	svc := schedule.NewService(scr, repo, rs)
+	handler := schedule.NewHandler(svc)
+
+	r.Get("/api/fields", handler.GetFields)
+	r.Get("/api/groups/{id}", handler.GetGroupsFromID)
+	r.Get("/api/schedule/{id}", handler.GetScheduleFromID)
 
 	addr := ":" + port
 	fmt.Printf("Server started at http://localhost:%s\n", port)
