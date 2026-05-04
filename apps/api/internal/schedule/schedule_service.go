@@ -11,12 +11,12 @@ func NewService(scraper Scraper, repo Repository) *Service {
 	return &Service{scraper: scraper, repo: repo}
 }
 
-func (s Service) GetFields(ctx context.Context, site string) (map[string]string, error) {
+func (s Service) GetFields(ctx context.Context) (map[string]string, error) {
 	if f, ok := s.repo.GetFields(ctx); ok {
 		return f, nil
 	}
 
-	f := s.scraper.GetFields(site)
+	f := s.scraper.GetFields(fieldsURL)
 	if err := s.repo.StoreFields(ctx, f); err != nil {
 		return nil, err
 	}
@@ -24,12 +24,12 @@ func (s Service) GetFields(ctx context.Context, site string) (map[string]string,
 	return f, nil
 }
 
-func (s Service) GetGroups(ctx context.Context, site string, fieldsID string) (map[string]string, error) {
+func (s Service) GetGroups(ctx context.Context, fieldsID string) (map[string]string, error) {
 	if g, ok := s.repo.GetGroups(ctx, fieldsID); ok {
 		return g, nil
 	}
 
-	g := s.scraper.GetGroupsFromID(site, fieldsID)
+	g := s.scraper.GetGroupsFromID(groupsURL, fieldsID)
 	if err := s.repo.StoreGroups(ctx, fieldsID, g); err != nil {
 		return nil, err
 	}
@@ -38,12 +38,12 @@ func (s Service) GetGroups(ctx context.Context, site string, fieldsID string) (m
 
 }
 
-func (s Service) GetSchedule(ctx context.Context, site string, groupID string) ([]Entry, error) {
+func (s Service) GetSchedule(ctx context.Context, groupID string) ([]Entry, error) {
 	if sh, ok := s.repo.GetSchedule(ctx, groupID); ok {
 		return sh, nil
 	}
 
-	sh, err := s.scraper.GetScheduleForID(site, groupID)
+	sh, err := s.scraper.GetScheduleForID(scheduleURL, groupID)
 	if err != nil {
 		return nil, err
 	}
