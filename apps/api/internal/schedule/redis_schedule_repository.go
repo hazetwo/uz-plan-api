@@ -2,6 +2,8 @@ package schedule
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/go-redsync/redsync/v4"
@@ -42,7 +44,7 @@ func (r RedisRepository) StoreFields(ctx context.Context, fields map[string]stri
 }
 
 func (r RedisRepository) GetGroups(ctx context.Context, fieldID string) (map[string]string, bool, error) {
-	g, err := r.rdb.HGetAll(ctx, "groups").Result()
+	g, err := r.rdb.HGetAll(ctx, "groups:"+fieldID).Result()
 	if err != nil {
 		return nil, false, err
 	}
@@ -55,8 +57,8 @@ func (r RedisRepository) GetGroups(ctx context.Context, fieldID string) (map[str
 
 func (r RedisRepository) StoreGroups(ctx context.Context, fieldID string, groups map[string]string) error {
 	p := r.rdb.Pipeline()
-	p.HSet(ctx, "groups", groups)
-	p.Expire(ctx, "groups", 24*time.Hour)
+	p.HSet(ctx, "groups:"+fieldID, groups)
+	p.Expire(ctx, "groups:"+fieldID, 24*time.Hour)
 	if _, err := p.Exec(ctx); err != nil {
 		return err
 	}
@@ -65,11 +67,24 @@ func (r RedisRepository) StoreGroups(ctx context.Context, fieldID string, groups
 }
 
 func (r RedisRepository) GetSchedule(ctx context.Context, groupID string) ([]Entry, bool, error) {
-	//TODO implement me
-	panic("implement me")
+	data, err := r.rdb.Get(ctx, "schedule:"+groupID).Bytes()
+	if errors.Is(err, redis.Nil) {
+		return nil, false, nil
+	}
+	if err != nil {
+		return nil, false, err
+	}
+	var entries []Entry
+	if err := json.Unmarshal(data, &entries); err != nil {
+		return nil, false, err
+	}
+	return entries, true, nil
 }
 
 func (r RedisRepository) StoreSchedule(ctx context.Context, groupID string, entries []Entry) error {
-	//TODO implement me
-	panic("implement me")
+	data, err := json.Marshal(entries)
+	if err != nil {
+		return err
+	}
+	return r.rdb.Set(ctx, "schedule:"+groupID, data, 4*time.Hour).Err()
 }
