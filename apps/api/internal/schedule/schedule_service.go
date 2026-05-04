@@ -41,6 +41,9 @@ func (s Service) GetFields(ctx context.Context) (map[string]string, error) {
 	if err != nil {
 		return nil, errs.ErrFetchFailed
 	}
+	if len(f) == 0 {
+		return nil, errs.ErrNotFound
+	}
 
 	if err := s.repo.StoreFields(ctx, f); err != nil {
 		return nil, errs.ErrFetchFailed
@@ -73,6 +76,10 @@ func (s Service) GetGroups(ctx context.Context, fieldsID string) (map[string]str
 	if err != nil {
 		return nil, errs.ErrFetchFailed
 	}
+	if len(g) == 0 {
+		return nil, errs.ErrNotFound
+	}
+
 	if err := s.repo.StoreGroups(ctx, fieldsID, g); err != nil {
 		return nil, errs.ErrFetchFailed
 	}
@@ -104,6 +111,9 @@ func (s Service) getSchedule(ctx context.Context, groupID string) ([]Entry, erro
 	sh, err = s.scraper.GetScheduleForID(scheduleURL, groupID)
 	if err != nil {
 		return nil, errs.ErrFetchFailed
+	}
+	if len(sh) == 0 {
+		return nil, errs.ErrNotFound
 	}
 
 	err = s.repo.StoreSchedule(ctx, groupID, sh)

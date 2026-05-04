@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 
 	"uz-plan-api/internal/database"
 	"uz-plan-api/internal/schedule"
@@ -22,16 +22,17 @@ func main() {
 
 	rdb, err := database.Connect(ctx)
 	if err != nil {
-		log.Fatal("Failed to connect to Redis:", err)
+		slog.Error("Failed to connect to Redis", "err", err)
+		os.Exit(1)
 	}
 	defer func() {
 		err := rdb.Close()
 		if err != nil {
-			log.Printf("Failed to close Redis: %v", err)
+			slog.Error("Failed to close Redis", "err", err)
 		}
 	}()
 
-	fmt.Println("Connected to Redis")
+	slog.Info("Connected to Redis")
 
 	var port = "8080"
 
@@ -49,8 +50,9 @@ func main() {
 	})
 
 	addr := ":" + port
-	fmt.Printf("Server started at http://localhost:%s\n", port)
+	slog.Info("Server listening", "addr", "http://localhost:"+port)
 	if err := http.ListenAndServe(addr, r); err != nil {
-		log.Fatal(err)
+		slog.Error("Server failed", "err", err)
+		os.Exit(1)
 	}
 }

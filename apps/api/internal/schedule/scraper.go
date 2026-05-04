@@ -2,7 +2,7 @@ package schedule
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
@@ -136,7 +136,7 @@ func (s Scraper) GetScheduleForID(site string, id string) ([]Entry, error) {
 		})
 		if err != nil {
 			errs = append(errs, err)
-			log.Print(err)
+			slog.Error("Errors caught when scraping schedule", err)
 		}
 		entries = append(entries, e)
 	})
