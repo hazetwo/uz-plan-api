@@ -2,9 +2,11 @@ package schedule
 
 import (
 	"net/http"
+	"uz-plan-api/internal/errs"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
+	"golang.org/x/time/rate"
 )
 
 type ErrorResponse struct {
@@ -13,13 +15,19 @@ type ErrorResponse struct {
 
 type Handler struct {
 	service *Service
+	limiter *rate.Limiter
 }
 
-func NewHandler(service *Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(service *Service, limiter *rate.Limiter) *Handler {
+	return &Handler{service: service, limiter: limiter}
 }
 
 func (h Handler) GetFields(w http.ResponseWriter, r *http.Request) {
+	if !h.limiter.Allow() {
+		render.Status(r, http.StatusTooManyRequests)
+		render.JSON(w, r, ErrorResponse{errs.ErrTooManyReq.Error()})
+		return
+	}
 	f, err := h.service.GetFields(r.Context())
 	if err != nil {
 		render.Status(r, http.StatusBadRequest)
@@ -32,6 +40,9 @@ func (h Handler) GetFields(w http.ResponseWriter, r *http.Request) {
 
 func (h Handler) GetGroupsFromID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
+	if id == "" {
+		return
+	}
 	g, err := h.service.GetGroups(r.Context(), id)
 	if err != nil {
 		render.Status(r, http.StatusBadRequest)

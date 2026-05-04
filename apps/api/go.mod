@@ -8,6 +8,7 @@ require (
 	github.com/go-chi/render v1.0.3
 	github.com/go-redsync/redsync/v4 v4.16.0
 	github.com/redis/go-redis/v9 v9.19.0
+	golang.org/x/time v0.15.0
 )
 
 require (

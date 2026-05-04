@@ -2,6 +2,7 @@ package schedule
 
 import (
 	"context"
+	"uz-plan-api/internal/errs"
 
 	"github.com/go-redsync/redsync/v4"
 )
@@ -19,7 +20,7 @@ func NewService(scraper *Scraper, repo Repository, rs *redsync.Redsync) *Service
 func (s Service) GetFields(ctx context.Context) (map[string]string, error) {
 	f, ok, err := s.repo.GetFields(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errs.ErrFetchFailed
 	}
 	if ok {
 		return f, nil
@@ -27,7 +28,7 @@ func (s Service) GetFields(ctx context.Context) (map[string]string, error) {
 
 	mu := s.rs.NewMutex("lock:fields")
 	if err := mu.LockContext(ctx); err != nil {
-		return nil, err
+		return nil, errs.ErrFetchFailed
 	}
 	defer func() {
 		_, err := mu.UnlockContext(ctx)
@@ -38,11 +39,11 @@ func (s Service) GetFields(ctx context.Context) (map[string]string, error) {
 
 	f, err = s.scraper.GetFields(fieldsURL)
 	if err != nil {
-		return nil, err
+		return nil, errs.ErrFetchFailed
 	}
 
 	if err := s.repo.StoreFields(ctx, f); err != nil {
-		return nil, err
+		return nil, errs.ErrFetchFailed
 	}
 
 	return f, nil
@@ -51,7 +52,7 @@ func (s Service) GetFields(ctx context.Context) (map[string]string, error) {
 func (s Service) GetGroups(ctx context.Context, fieldsID string) (map[string]string, error) {
 	g, ok, err := s.repo.GetGroups(ctx, fieldsID)
 	if err != nil {
-		return nil, err
+		return nil, errs.ErrFetchFailed
 	}
 	if ok {
 		return g, nil
@@ -59,7 +60,7 @@ func (s Service) GetGroups(ctx context.Context, fieldsID string) (map[string]str
 
 	mu := s.rs.NewMutex("lock:group:" + fieldsID)
 	if err := mu.LockContext(ctx); err != nil {
-		return nil, err
+		return nil, errs.ErrFetchFailed
 	}
 	defer func() {
 		_, err := mu.UnlockContext(ctx)
@@ -70,10 +71,10 @@ func (s Service) GetGroups(ctx context.Context, fieldsID string) (map[string]str
 
 	g, err = s.scraper.GetGroupsFromID(groupsURL, fieldsID)
 	if err != nil {
-		return nil, err
+		return nil, errs.ErrFetchFailed
 	}
 	if err := s.repo.StoreGroups(ctx, fieldsID, g); err != nil {
-		return nil, err
+		return nil, errs.ErrFetchFailed
 	}
 
 	return g, nil
@@ -83,7 +84,7 @@ func (s Service) GetGroups(ctx context.Context, fieldsID string) (map[string]str
 func (s Service) getSchedule(ctx context.Context, groupID string) ([]Entry, error) {
 	sh, ok, err := s.repo.GetSchedule(ctx, groupID)
 	if err != nil {
-		return nil, err
+		return nil, errs.ErrFetchFailed
 	}
 	if ok {
 		return sh, nil
@@ -91,7 +92,7 @@ func (s Service) getSchedule(ctx context.Context, groupID string) ([]Entry, erro
 
 	mu := s.rs.NewMutex("lock:schedule:" + groupID)
 	if err := mu.LockContext(ctx); err != nil {
-		return nil, err
+		return nil, errs.ErrFetchFailed
 	}
 	defer func() {
 		_, err := mu.UnlockContext(ctx)
@@ -102,12 +103,12 @@ func (s Service) getSchedule(ctx context.Context, groupID string) ([]Entry, erro
 
 	sh, err = s.scraper.GetScheduleForID(scheduleURL, groupID)
 	if err != nil {
-		return nil, err
+		return nil, errs.ErrFetchFailed
 	}
 
 	err = s.repo.StoreSchedule(ctx, groupID, sh)
 	if err != nil {
-		return nil, err
+		return nil, errs.ErrFetchFailed
 	}
 
 	return sh, nil
@@ -117,7 +118,7 @@ func (s Service) getSchedule(ctx context.Context, groupID string) ([]Entry, erro
 func (s Service) GetFilteredSchedule(ctx context.Context, groupID string, f Filter) ([]Entry, error) {
 	entries, err := s.getSchedule(ctx, groupID)
 	if err != nil {
-		return nil, err
+		return nil, errs.ErrFetchFailed
 	}
 
 	var filtered = filterEntries(entries, dayPredicate(f.Day), weekPredicate(f.Week), subgroupPredicate(f.Subgroup))

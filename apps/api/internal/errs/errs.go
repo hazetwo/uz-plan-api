@@ -3,5 +3,6 @@ package errs
 import "errors"
 
 var (
-	ErrInvalidDate = errors.New("invalid date format")
+	ErrFetchFailed = errors.New("failed to fetch data")
+	ErrTooManyReq  = errors.New("too many requests")
 )

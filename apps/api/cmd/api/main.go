@@ -5,13 +5,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
 	"uz-plan-api/internal/database"
 	"uz-plan-api/internal/schedule"
 
 	"github.com/go-chi/chi/v5"
+	"golang.org/x/time/rate"
 )
 
-var supported = []string{"401"}
+//var supported = []string{"401"}
 
 func main() {
 	ctx := context.Background()
@@ -33,10 +35,12 @@ func main() {
 
 	var port = "8080"
 
+	limiter := rate.NewLimiter(rate.Limit(10), 20)
+
 	scr := schedule.NewScraper()
 	repo, rs := schedule.NewRedisRepository(rdb)
 	svc := schedule.NewService(scr, repo, rs)
-	handler := schedule.NewHandler(svc)
+	handler := schedule.NewHandler(svc, limiter)
 
 	r.Get("/api/fields", handler.GetFields)
 	r.Get("/api/groups/{id}", handler.GetGroupsFromID)
