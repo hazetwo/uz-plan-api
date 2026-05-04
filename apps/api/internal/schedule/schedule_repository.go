@@ -12,3 +12,5 @@ type Repository interface {
 	GetSchedule(ctx context.Context, groupID string) ([]Entry, bool)
 	StoreSchedule(ctx context.Context, groupID string, entries []Entry) error
 }
+
+var _ Repository = RedisRepository{}

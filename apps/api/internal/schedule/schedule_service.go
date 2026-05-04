@@ -7,8 +7,8 @@ type Service struct {
 	repo    Repository
 }
 
-func NewService(scraper Scraper, repo Repository) Service {
-	return Service{scraper: scraper, repo: repo}
+func NewService(scraper Scraper, repo Repository) *Service {
+	return &Service{scraper: scraper, repo: repo}
 }
 
 func (s Service) GetFields(ctx context.Context, site string) (map[string]string, error) {

@@ -12,8 +12,8 @@ type Scraper struct {
 	c *colly.Collector
 }
 
-func NewScraper(domain string) Scraper {
-	return Scraper{
+func NewScraper(domain string) *Scraper {
+	return &Scraper{
 		c: colly.NewCollector(
 			colly.AllowedDomains(domain)),
 	}
