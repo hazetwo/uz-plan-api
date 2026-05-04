@@ -42,9 +42,11 @@ func main() {
 	svc := schedule.NewService(scr, repo, rs)
 	handler := schedule.NewHandler(svc, limiter)
 
-	r.Get("/api/fields", handler.GetFields)
-	r.Get("/api/groups/{id}", handler.GetGroupsFromID)
-	r.Get("/api/schedule/{id}", handler.GetScheduleFromID)
+	r.Route("/api/v1", func(r chi.Router) {
+		r.Get("/fields", handler.GetFields)
+		r.Get("/groups/{id}", handler.GetGroupsFromID)
+		r.Get("/schedule/{id}", handler.GetScheduleFromID)
+	})
 
 	addr := ":" + port
 	fmt.Printf("Server started at http://localhost:%s\n", port)
