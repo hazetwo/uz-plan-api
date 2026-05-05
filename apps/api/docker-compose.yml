@@ -1,3 +1,4 @@
+name: better-uz-plan
 services:
   api:
     build: .
