@@ -2,6 +2,7 @@ package schedule
 
 import (
 	"net/http"
+	"strings"
 	"uz-plan-api/internal/errs"
 
 	"github.com/go-chi/chi/v5"
@@ -76,7 +77,8 @@ func (h Handler) GetScheduleFromID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if sg := r.URL.Query().Get("subgroup"); sg != "" {
-		f.Subgroup = ParseSubgroup(sg)
+		sgUpper := strings.ToUpper(sg)
+		f.Subgroup = ParseSubgroup(sgUpper)
 	}
 
 	s, err := h.service.GetFilteredSchedule(r.Context(), id, f)
