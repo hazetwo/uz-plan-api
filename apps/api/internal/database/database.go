@@ -11,17 +11,16 @@ import (
 )
 
 func Connect(ctx context.Context) (*redis.Client, error) {
-	addr := os.Getenv("REDIS_ADDR")
-	if addr == "" {
-		addr = "localhost:6379"
+	u := os.Getenv("REDIS_URL")
+	if u == "" {
+		u = "redis://localhost:6379"
 	}
-	password := os.Getenv("REDIS_PASSWORD")
+	opts, err := redis.ParseURL(u)
+	if err != nil {
+		return nil, err
+	}
 
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     addr,
-		Password: password,
-		DB:       0,
-	})
+	rdb := redis.NewClient(opts)
 
 	const maxAttempts = 5
 	const retryDelay = 2 * time.Second
@@ -32,9 +31,9 @@ func Connect(ctx context.Context) (*redis.Client, error) {
 		}
 		if attempt == maxAttempts {
 			_ = rdb.Close()
-			return nil, fmt.Errorf("could not connect to Redis at %s after %d attempts", addr, maxAttempts)
+			return nil, fmt.Errorf("could not connect to Redis at %s after %d attempts", opts.Addr, maxAttempts)
 		}
-		slog.Warn("Redis not ready, retrying...", "attempt", attempt, "addr", addr, "retry_in", retryDelay)
+		slog.Warn("Redis not ready, retrying...", "attempt", attempt, "addr", opts.Addr, "retry_in", retryDelay)
 		select {
 		case <-ctx.Done():
 			_ = rdb.Close()
