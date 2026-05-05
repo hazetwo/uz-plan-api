@@ -211,3 +211,8 @@ __marimo__/
 
 # mac_os
 .DS_Store
+
+python
+.claude
+bin
+.cmux
