@@ -22,7 +22,7 @@ build-mac:
 	GOARCH=arm64 GOOS=darwin go build -o ./bin/app-macos $(APP)
 
 start-redis:
-	docker compose up -d redis
+	docker compose up redis
 
 stop-redis:
 	docker compose down redis
