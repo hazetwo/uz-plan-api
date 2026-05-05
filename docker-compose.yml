@@ -1,28 +1,20 @@
 services:
   api:
-    build:
-      context: .
-      dockerfile: apps/api/Dockerfile
+    build: .
     depends_on:
       redis:
         condition: service_healthy
     environment:
-      REDIS__URL: redis://redis:6379
+      REDIS_URL: redis://redis:6379
     ports:
-      - "8000:8000"
+      - "8080:8080"
     restart: unless-stopped
     healthcheck:
-      test:
-        [
-          "CMD",
-          "python",
-          "-c",
-          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/').read()",
-        ]
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/api/v1/fields"]
       interval: 30s
       timeout: 5s
       retries: 5
-      start_period: 20s
+      start_period: 10s
 
   redis:
     image: redis:7-alpine
