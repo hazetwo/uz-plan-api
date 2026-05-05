@@ -13,8 +13,6 @@ import (
 	"golang.org/x/time/rate"
 )
 
-//var supported = []string{"401"}
-
 func main() {
 	ctx := context.Background()
 
@@ -34,8 +32,6 @@ func main() {
 
 	slog.Info("Connected to Redis")
 
-	var port = "8080"
-
 	limiter := rate.NewLimiter(rate.Limit(10), 20)
 
 	scr := schedule.NewScraper()
@@ -49,9 +45,13 @@ func main() {
 		r.Get("/schedule/{id}", handler.GetScheduleFromID)
 	})
 
-	addr := ":" + port
-	slog.Info("Server listening", "addr", "http://localhost:"+port)
-	if err := http.ListenAndServe(addr, r); err != nil {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	slog.Info("Server listening", "addr", "http://0.0.0.0:"+port)
+	if err := http.ListenAndServe(":"+port, r); err != nil {
 		slog.Error("Server failed", "err", err)
 		os.Exit(1)
 	}
