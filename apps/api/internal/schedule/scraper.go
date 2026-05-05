@@ -136,7 +136,7 @@ func (s Scraper) GetScheduleForID(site string, id string) ([]Entry, error) {
 		})
 		if err != nil {
 			errs = append(errs, err)
-			slog.Error("Errors caught when scraping schedule", err)
+			slog.Error("Errors caught when scraping schedule", "err", err)
 		}
 		entries = append(entries, e)
 	})
