@@ -19,7 +19,8 @@ test:
 	go test ./...
 
 clean:
-	rm -f $(BIN)
+	rm -rf ./bin ./api
+	rm -rf ./tmp
 
 build-mac:
 	GOARCH=arm64 GOOS=darwin go build -o ./bin/app-macos $(APP)
