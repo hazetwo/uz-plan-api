@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-
+	"uz-plan-api/docs"
 	"uz-plan-api/internal/database"
 	"uz-plan-api/internal/schedule"
 
@@ -38,6 +38,11 @@ func main() {
 	repo, rs := schedule.NewRedisRepository(rdb)
 	svc := schedule.NewService(scr, repo, rs)
 	handler := schedule.NewHandler(svc, limiter)
+
+	env := os.Getenv("APP_ENV")
+	if env != "production" {
+		r.Get("/openapi.yaml", docs.Spec)
+	}
 
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get("/fields", handler.GetFields)
