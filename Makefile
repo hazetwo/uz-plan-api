@@ -9,8 +9,11 @@ build:
 run:
 	go run $(APP)
 
-dev: build
-	$(BIN)
+build-tmp:
+	go build -o ./tmp/app $(APP)
+
+dev:
+	$(shell go env GOPATH)/bin/air
 
 test:
 	go test ./...

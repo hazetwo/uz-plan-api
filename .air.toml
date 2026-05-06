@@ -1,0 +1,16 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "make build-tmp"
+exclude_dir = ["tmp", "bin", ".git"]
+entrypoint = ["./tmp/app"]
+
+[misc]
+startup_banner = ""
+clean_on_exit = true
+
+
+[screen]
+clear_on_rebuild = true
+keep_scroll = true
