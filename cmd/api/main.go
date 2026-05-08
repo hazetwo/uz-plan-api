@@ -10,7 +10,6 @@ import (
 	"uz-plan-api/internal/handler"
 	"uz-plan-api/internal/schedule"
 	"uz-plan-api/internal/scraper"
-	"uz-plan-api/internal/storage"
 
 	"github.com/go-chi/chi/v5"
 	"golang.org/x/time/rate"
@@ -38,7 +37,7 @@ func main() {
 	limiter := rate.NewLimiter(rate.Limit(10), 20)
 
 	scr := scraper.New()
-	repo, rs := storage.New(rdb)
+	repo, rs := database.New(rdb)
 	svc := schedule.NewService(scr, repo, rs)
 	h := handler.New(svc, limiter)
 

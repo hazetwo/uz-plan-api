@@ -2,8 +2,8 @@ package schedule
 
 import (
 	"context"
+	"uz-plan-api/internal/database"
 	"uz-plan-api/internal/model"
-	"uz-plan-api/internal/storage"
 )
 
 type Repository interface {
@@ -17,4 +17,4 @@ type Repository interface {
 	StoreSchedule(ctx context.Context, groupID string, entries []model.Entry) error
 }
 
-var _ Repository = storage.RedisRepository{}
+var _ Repository = database.RedisRepository{}
