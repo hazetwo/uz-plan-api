@@ -1,4 +1,4 @@
-package schedule
+package model
 
 import (
 	"reflect"
@@ -20,24 +20,6 @@ func TestParseSubgroup(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := ParseSubgroup(tt.subgroup); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ParseSubgroup() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_strPtr(t *testing.T) {
-	tests := []struct {
-		name string
-		s    string
-		want *string
-	}{
-		{"valid", "test", new("test")},
-		{"empty", "", nil},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := strPtr(tt.s); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("strPtr() = %v, want %v", got, tt.want)
 			}
 		})
 	}

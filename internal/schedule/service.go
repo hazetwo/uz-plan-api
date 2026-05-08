@@ -3,17 +3,19 @@ package schedule
 import (
 	"context"
 	"uz-plan-api/internal/errs"
+	"uz-plan-api/internal/model"
+	"uz-plan-api/internal/scraper"
 
 	"github.com/go-redsync/redsync/v4"
 )
 
 type Service struct {
-	scraper *Scraper
+	scraper *scraper.Scraper
 	repo    Repository
 	rs      *redsync.Redsync
 }
 
-func NewService(scraper *Scraper, repo Repository, rs *redsync.Redsync) *Service {
+func NewService(scraper *scraper.Scraper, repo Repository, rs *redsync.Redsync) *Service {
 	return &Service{scraper: scraper, repo: repo, rs: rs}
 }
 
@@ -37,7 +39,7 @@ func (s Service) GetFields(ctx context.Context) (map[string]string, error) {
 		}
 	}()
 
-	f, err = s.scraper.GetFields(fieldsURL)
+	f, err = s.scraper.GetFields(scraper.FieldsURL)
 	if err != nil {
 		return nil, errs.ErrFetchFailed
 	}
@@ -72,7 +74,7 @@ func (s Service) GetGroups(ctx context.Context, fieldsID string) (map[string]str
 		}
 	}()
 
-	g, err = s.scraper.GetGroupsFromID(groupsURL, fieldsID)
+	g, err = s.scraper.GetGroupsFromID(scraper.GroupsURL, fieldsID)
 	if err != nil {
 		return nil, errs.ErrFetchFailed
 	}
@@ -88,7 +90,7 @@ func (s Service) GetGroups(ctx context.Context, fieldsID string) (map[string]str
 
 }
 
-func (s Service) getSchedule(ctx context.Context, groupID string) ([]Entry, error) {
+func (s Service) getSchedule(ctx context.Context, groupID string) ([]model.Entry, error) {
 	sh, ok, err := s.repo.GetSchedule(ctx, groupID)
 	if err != nil {
 		return nil, errs.ErrFetchFailed
@@ -108,7 +110,7 @@ func (s Service) getSchedule(ctx context.Context, groupID string) ([]Entry, erro
 		}
 	}()
 
-	sh, err = s.scraper.GetScheduleForID(scheduleURL, groupID)
+	sh, err = s.scraper.GetScheduleForID(scraper.ScheduleURL, groupID)
 	if err != nil {
 		return nil, errs.ErrFetchFailed
 	}
@@ -125,13 +127,16 @@ func (s Service) getSchedule(ctx context.Context, groupID string) ([]Entry, erro
 
 }
 
-func (s Service) GetFilteredSchedule(ctx context.Context, groupID string, f Filter) ([]Entry, error) {
+func (s Service) GetFilteredSchedule(ctx context.Context, groupID string, f model.Filter) ([]model.Entry, error) {
 	entries, err := s.getSchedule(ctx, groupID)
 	if err != nil {
 		return nil, errs.ErrFetchFailed
 	}
 
-	var filtered = filterEntries(entries, dayPredicate(f.Day), weekPredicate(f.Week), subgroupPredicate(f.Subgroup))
+	var filtered = model.FilterEntries(
+		entries, model.DayPredicate(f.Day),
+		model.WeekPredicate(f.Week),
+		model.SubgroupPredicate(f.Subgroup))
 
 	return filtered, nil
 }

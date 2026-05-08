@@ -1,10 +1,11 @@
-package schedule
+package storage
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
 	"time"
+	"uz-plan-api/internal/model"
 
 	"github.com/go-redsync/redsync/v4"
 	"github.com/go-redsync/redsync/v4/redis/goredis/v9"
@@ -15,7 +16,7 @@ type RedisRepository struct {
 	rdb *redis.Client
 }
 
-func NewRedisRepository(rdb *redis.Client) (*RedisRepository, *redsync.Redsync) {
+func New(rdb *redis.Client) (*RedisRepository, *redsync.Redsync) {
 	pool := goredis.NewPool(rdb)
 	return &RedisRepository{rdb: rdb}, redsync.New(pool)
 }
@@ -66,7 +67,7 @@ func (r RedisRepository) StoreGroups(ctx context.Context, fieldID string, groups
 	return nil
 }
 
-func (r RedisRepository) GetSchedule(ctx context.Context, groupID string) ([]Entry, bool, error) {
+func (r RedisRepository) GetSchedule(ctx context.Context, groupID string) ([]model.Entry, bool, error) {
 	data, err := r.rdb.Get(ctx, "schedule:"+groupID).Bytes()
 	if errors.Is(err, redis.Nil) {
 		return nil, false, nil
@@ -74,14 +75,14 @@ func (r RedisRepository) GetSchedule(ctx context.Context, groupID string) ([]Ent
 	if err != nil {
 		return nil, false, err
 	}
-	var entries []Entry
+	var entries []model.Entry
 	if err := json.Unmarshal(data, &entries); err != nil {
 		return nil, false, err
 	}
 	return entries, true, nil
 }
 
-func (r RedisRepository) StoreSchedule(ctx context.Context, groupID string, entries []Entry) error {
+func (r RedisRepository) StoreSchedule(ctx context.Context, groupID string, entries []model.Entry) error {
 	data, err := json.Marshal(entries)
 	if err != nil {
 		return err

@@ -1,6 +1,10 @@
 package schedule
 
-import "context"
+import (
+	"context"
+	"uz-plan-api/internal/model"
+	"uz-plan-api/internal/storage"
+)
 
 type Repository interface {
 	GetFields(ctx context.Context) (map[string]string, bool, error)
@@ -9,8 +13,8 @@ type Repository interface {
 	GetGroups(ctx context.Context, fieldID string) (map[string]string, bool, error)
 	StoreGroups(ctx context.Context, fieldID string, groups map[string]string) error
 
-	GetSchedule(ctx context.Context, groupID string) ([]Entry, bool, error)
-	StoreSchedule(ctx context.Context, groupID string, entries []Entry) error
+	GetSchedule(ctx context.Context, groupID string) ([]model.Entry, bool, error)
+	StoreSchedule(ctx context.Context, groupID string, entries []model.Entry) error
 }
 
-var _ Repository = RedisRepository{}
+var _ Repository = storage.RedisRepository{}

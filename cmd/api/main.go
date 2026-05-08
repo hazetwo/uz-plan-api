@@ -7,7 +7,10 @@ import (
 	"os"
 	"uz-plan-api/docs"
 	"uz-plan-api/internal/database"
+	"uz-plan-api/internal/handler"
 	"uz-plan-api/internal/schedule"
+	"uz-plan-api/internal/scraper"
+	"uz-plan-api/internal/storage"
 
 	"github.com/go-chi/chi/v5"
 	"golang.org/x/time/rate"
@@ -34,10 +37,10 @@ func main() {
 
 	limiter := rate.NewLimiter(rate.Limit(10), 20)
 
-	scr := schedule.NewScraper()
-	repo, rs := schedule.NewRedisRepository(rdb)
+	scr := scraper.New()
+	repo, rs := storage.New(rdb)
 	svc := schedule.NewService(scr, repo, rs)
-	handler := schedule.NewHandler(svc, limiter)
+	h := handler.New(svc, limiter)
 
 	env := os.Getenv("APP_ENV")
 	if env != "production" {
@@ -45,9 +48,9 @@ func main() {
 	}
 
 	r.Route("/api/v1", func(r chi.Router) {
-		r.Get("/fields", handler.GetFields)
-		r.Get("/groups/{id}", handler.GetGroupsFromID)
-		r.Get("/schedule/{id}", handler.GetScheduleFromID)
+		r.Get("/fields", h.GetFields)
+		r.Get("/groups/{id}", h.GetGroupsFromID)
+		r.Get("/schedule/{id}", h.GetScheduleFromID)
 	})
 
 	port := os.Getenv("PORT")

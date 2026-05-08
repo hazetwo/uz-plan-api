@@ -1,11 +1,10 @@
-package schedule
+package scraper
 
 import (
-	"errors"
-	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
+	"uz-plan-api/internal/model"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -13,7 +12,7 @@ import (
 type Scraper struct {
 }
 
-func NewScraper() *Scraper {
+func New() *Scraper {
 	return &Scraper{}
 }
 
@@ -100,9 +99,8 @@ func (s Scraper) GetGroupsFromID(site string, id string) (map[string]string, err
 	return g, nil
 }
 
-func (s Scraper) GetScheduleForID(site string, id string) ([]Entry, error) {
-	var entries []Entry
-	var errs []error
+func (s Scraper) GetScheduleForID(site string, id string) ([]model.Entry, error) {
+	var entries []model.Entry
 
 	u, err := getURLWithID(site, id)
 	if err != nil {
@@ -124,7 +122,7 @@ func (s Scraper) GetScheduleForID(site string, id string) ([]Entry, error) {
 		classType := strings.TrimSpace(s.Find("td:nth-child(7)").Text())
 		teacher := strings.TrimSpace(s.Find("td:nth-child(8)").Text())
 		classroom := strings.TrimSpace(s.Find("td:nth-child(9)").Text())
-		e, err := FromScraper(RawEntry{
+		e := FromScraper(RawEntry{
 			Group:     group,
 			Start:     start,
 			End:       end,
@@ -134,16 +132,8 @@ func (s Scraper) GetScheduleForID(site string, id string) ([]Entry, error) {
 			Teacher:   teacher,
 			Classroom: classroom,
 		})
-		if err != nil {
-			errs = append(errs, err)
-			slog.Error("Errors caught when scraping schedule", "err", err)
-		}
 		entries = append(entries, e)
 	})
-
-	if len(errs) > 0 {
-		return nil, errors.Join(errs...)
-	}
 
 	return entries, nil
 

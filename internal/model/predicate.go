@@ -1,8 +1,8 @@
-package schedule
+package model
 
 type Predicate func(Entry) bool
 
-func filterEntries(entries []Entry, predicates ...Predicate) []Entry {
+func FilterEntries(entries []Entry, predicates ...Predicate) []Entry {
 	var result []Entry
 	for _, e := range entries {
 		match := true
@@ -19,19 +19,19 @@ func filterEntries(entries []Entry, predicates ...Predicate) []Entry {
 	return result
 }
 
-func dayPredicate(day *string) Predicate {
+func DayPredicate(day *string) Predicate {
 	return func(e Entry) bool {
 		return matchesDay(e, day)
 	}
 }
 
-func weekPredicate(week *string) Predicate {
+func WeekPredicate(week *string) Predicate {
 	return func(e Entry) bool {
 		return matchesWeek(e, week)
 	}
 }
 
-func subgroupPredicate(subgroup *Subgroup) Predicate {
+func SubgroupPredicate(subgroup *Subgroup) Predicate {
 	return func(e Entry) bool {
 		return matchesSubgroup(e, subgroup)
 	}

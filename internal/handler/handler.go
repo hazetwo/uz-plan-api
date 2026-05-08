@@ -1,9 +1,11 @@
-package schedule
+package handler
 
 import (
 	"net/http"
 	"strings"
 	"uz-plan-api/internal/errs"
+	"uz-plan-api/internal/model"
+	"uz-plan-api/internal/schedule"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
@@ -15,11 +17,11 @@ type ErrorResponse struct {
 }
 
 type Handler struct {
-	service *Service
+	service *schedule.Service
 	limiter *rate.Limiter
 }
 
-func NewHandler(service *Service, limiter *rate.Limiter) *Handler {
+func New(service *schedule.Service, limiter *rate.Limiter) *Handler {
 	return &Handler{service: service, limiter: limiter}
 }
 
@@ -68,7 +70,7 @@ func (h Handler) GetScheduleFromID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	f := Filter{}
+	f := model.Filter{}
 
 	if d := r.URL.Query().Get("day"); d != "" {
 		f.Day = &d
@@ -78,7 +80,7 @@ func (h Handler) GetScheduleFromID(w http.ResponseWriter, r *http.Request) {
 
 	if sg := r.URL.Query().Get("subgroup"); sg != "" {
 		sgUpper := strings.ToUpper(sg)
-		f.Subgroup = ParseSubgroup(sgUpper)
+		f.Subgroup = model.ParseSubgroup(sgUpper)
 	}
 
 	s, err := h.service.GetFilteredSchedule(r.Context(), id, f)
