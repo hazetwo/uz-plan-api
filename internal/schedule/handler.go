@@ -1,11 +1,10 @@
-package handler
+package schedule
 
 import (
 	"net/http"
 	"strings"
 	"uz-plan-api/internal/errs"
 	"uz-plan-api/internal/model"
-	"uz-plan-api/internal/schedule"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
@@ -17,11 +16,11 @@ type ErrorResponse struct {
 }
 
 type Handler struct {
-	service *schedule.Service
+	service *Service
 	limiter *rate.Limiter
 }
 
-func New(service *schedule.Service, limiter *rate.Limiter) *Handler {
+func NewHandler(service *Service, limiter *rate.Limiter) *Handler {
 	return &Handler{service: service, limiter: limiter}
 }
 

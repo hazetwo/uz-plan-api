@@ -7,7 +7,6 @@ import (
 	"os"
 	"uz-plan-api/docs"
 	"uz-plan-api/internal/database"
-	"uz-plan-api/internal/handler"
 	"uz-plan-api/internal/schedule"
 	"uz-plan-api/internal/scraper"
 
@@ -39,7 +38,7 @@ func main() {
 	scr := scraper.New()
 	repo, rs := database.New(rdb)
 	svc := schedule.NewService(scr, repo, rs)
-	h := handler.New(svc, limiter)
+	h := schedule.NewHandler(svc, limiter)
 
 	env := os.Getenv("APP_ENV")
 	if env != "production" {
