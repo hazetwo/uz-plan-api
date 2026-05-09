@@ -1,6 +1,7 @@
 package scraper
 
 import (
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
@@ -21,7 +22,12 @@ func getDocument(site string) (*goquery.Document, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			slog.Error("Failed to close document", "site", site)
+		}
+	}()
 
 	if res.StatusCode != 200 {
 		return nil, err
