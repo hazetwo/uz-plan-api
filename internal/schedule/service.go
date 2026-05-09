@@ -2,6 +2,7 @@ package schedule
 
 import (
 	"context"
+	"log/slog"
 	"uz-plan-api/internal/errs"
 	"uz-plan-api/internal/model"
 	"uz-plan-api/internal/scraper"
@@ -28,30 +29,29 @@ func (s Service) GetFields(ctx context.Context) (map[string]string, error) {
 		return f, nil
 	}
 
-	mu := s.rs.NewMutex("lock:fields")
-	if err := mu.LockContext(ctx); err != nil {
-		return nil, errs.ErrFetchFailed
-	}
-	defer func() {
-		_, err := mu.UnlockContext(ctx)
+	var result map[string]string
+	if err := s.withLock(ctx, "lock:fields", func() error {
+		cached, ok, err := s.repo.GetFields(ctx)
 		if err != nil {
-			return
+			return errs.ErrFetchFailed
 		}
-	}()
-
-	f, err = s.scraper.GetFields(scraper.FieldsURL)
-	if err != nil {
-		return nil, errs.ErrFetchFailed
+		if ok {
+			result = cached
+			return nil
+		}
+		result, err = s.scraper.GetFields(scraper.FieldsURL)
+		if err != nil {
+			return errs.ErrFetchFailed
+		}
+		if len(result) == 0 {
+			return errs.ErrNotFound
+		}
+		return s.repo.StoreFields(ctx, result)
+	}); err != nil {
+		return nil, err
 	}
-	if len(f) == 0 {
-		return nil, errs.ErrNotFound
-	}
 
-	if err := s.repo.StoreFields(ctx, f); err != nil {
-		return nil, errs.ErrFetchFailed
-	}
-
-	return f, nil
+	return result, nil
 }
 
 func (s Service) GetGroups(ctx context.Context, fieldsID string) (map[string]string, error) {
@@ -63,31 +63,29 @@ func (s Service) GetGroups(ctx context.Context, fieldsID string) (map[string]str
 		return g, nil
 	}
 
-	mu := s.rs.NewMutex("lock:group:" + fieldsID)
-	if err := mu.LockContext(ctx); err != nil {
-		return nil, errs.ErrFetchFailed
-	}
-	defer func() {
-		_, err := mu.UnlockContext(ctx)
+	var result map[string]string
+	if err := s.withLock(ctx, "lock:group:"+fieldsID, func() error {
+		cached, ok, err := s.repo.GetGroups(ctx, fieldsID)
 		if err != nil {
-			return
+			return errs.ErrFetchFailed
 		}
-	}()
-
-	g, err = s.scraper.GetGroupsFromID(scraper.GroupsURL, fieldsID)
-	if err != nil {
-		return nil, errs.ErrFetchFailed
+		if ok {
+			result = cached
+			return nil
+		}
+		result, err = s.scraper.GetGroupsFromID(scraper.GroupsURL, fieldsID)
+		if err != nil {
+			return errs.ErrFetchFailed
+		}
+		if len(result) == 0 {
+			return errs.ErrNotFound
+		}
+		return s.repo.StoreGroups(ctx, fieldsID, result)
+	}); err != nil {
+		return nil, err
 	}
-	if len(g) == 0 {
-		return nil, errs.ErrNotFound
-	}
 
-	if err := s.repo.StoreGroups(ctx, fieldsID, g); err != nil {
-		return nil, errs.ErrFetchFailed
-	}
-
-	return g, nil
-
+	return result, nil
 }
 
 func (s Service) getSchedule(ctx context.Context, groupID string) ([]model.Entry, error) {
@@ -99,32 +97,29 @@ func (s Service) getSchedule(ctx context.Context, groupID string) ([]model.Entry
 		return sh, nil
 	}
 
-	mu := s.rs.NewMutex("lock:schedule:" + groupID)
-	if err := mu.LockContext(ctx); err != nil {
-		return nil, errs.ErrFetchFailed
-	}
-	defer func() {
-		_, err := mu.UnlockContext(ctx)
+	var result []model.Entry
+	if err := s.withLock(ctx, "lock:schedule:"+groupID, func() error {
+		cached, ok, err := s.repo.GetSchedule(ctx, groupID)
 		if err != nil {
-			return
+			return errs.ErrFetchFailed
 		}
-	}()
-
-	sh, err = s.scraper.GetScheduleForID(scraper.ScheduleURL, groupID)
-	if err != nil {
-		return nil, errs.ErrFetchFailed
+		if ok {
+			result = cached
+			return nil
+		}
+		result, err = s.scraper.GetScheduleForID(scraper.ScheduleURL, groupID)
+		if err != nil {
+			return errs.ErrFetchFailed
+		}
+		if len(result) == 0 {
+			return errs.ErrNotFound
+		}
+		return s.repo.StoreSchedule(ctx, groupID, result)
+	}); err != nil {
+		return nil, err
 	}
-	if len(sh) == 0 {
-		return nil, errs.ErrNotFound
-	}
 
-	err = s.repo.StoreSchedule(ctx, groupID, sh)
-	if err != nil {
-		return nil, errs.ErrFetchFailed
-	}
-
-	return sh, nil
-
+	return result, nil
 }
 
 func (s Service) GetFilteredSchedule(ctx context.Context, groupID string, f model.Filter) ([]model.Entry, error) {
@@ -139,4 +134,18 @@ func (s Service) GetFilteredSchedule(ctx context.Context, groupID string, f mode
 		model.SubgroupPredicate(f.Subgroup))
 
 	return filtered, nil
+}
+
+func (s Service) withLock(ctx context.Context, key string, fn func() error) error {
+	mu := s.rs.NewMutex(key)
+	if err := mu.LockContext(ctx); err != nil {
+		return errs.ErrFetchFailed
+	}
+	defer func() {
+		if _, err := mu.UnlockContext(ctx); err != nil {
+			slog.ErrorContext(ctx, "failed to release lock", "key", key, "err", err)
+		}
+	}()
+
+	return fn()
 }
