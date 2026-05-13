@@ -65,15 +65,15 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = ":8080"
+		port = "8080"
 	}
 
 	notify, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
 	defer stop()
 
-	slog.Info("Server listening", "addr", "http://0.0.0.0"+port)
+	slog.Info("Server listening", "addr", "http://0.0.0.0:"+port)
 	server := &http.Server{
-		Addr:    port,
+		Addr:    ":" + port,
 		Handler: r,
 		BaseContext: func(listener net.Listener) context.Context {
 			return ctx
