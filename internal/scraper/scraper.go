@@ -1,24 +1,28 @@
 package scraper
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 	"uz-plan-api/internal/model"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
 type Scraper struct {
+	client *http.Client
 }
 
 func New() *Scraper {
-	return &Scraper{}
+	client := &http.Client{Timeout: 10 * time.Second}
+	return &Scraper{client: client}
 }
 
-func getDocument(site string) (*goquery.Document, error) {
-	res, err := http.Get(site)
+func (s Scraper) getDocument(site string) (*goquery.Document, error) {
+	res, err := s.client.Get(site)
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +34,7 @@ func getDocument(site string) (*goquery.Document, error) {
 	}()
 
 	if res.StatusCode != 200 {
-		return nil, err
+		return nil, fmt.Errorf("unexpected status %d", res.StatusCode)
 	}
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
@@ -56,7 +60,7 @@ func getURLWithID(site string, id string) (string, error) {
 func (s Scraper) GetFields(site string) (map[string]string, error) {
 	f := make(map[string]string)
 
-	doc, err := getDocument(site)
+	doc, err := s.getDocument(site)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +87,7 @@ func (s Scraper) GetGroupsFromID(site string, id string) (map[string]string, err
 		return nil, err
 	}
 
-	doc, err := getDocument(u)
+	doc, err := s.getDocument(u)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +117,7 @@ func (s Scraper) GetScheduleForID(site string, id string) ([]model.Entry, error)
 		return nil, err
 	}
 
-	doc, err := getDocument(u)
+	doc, err := s.getDocument(u)
 	if err != nil {
 		return nil, err
 	}
