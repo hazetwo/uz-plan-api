@@ -1,7 +1,9 @@
 package errs
 
 import (
+	"context"
 	"errors"
+	"log/slog"
 	"net/http"
 )
 
@@ -10,6 +12,11 @@ var (
 	ErrNotFound    = errors.New("not found")
 	ErrTooManyReq  = errors.New("too many requests")
 )
+
+func FetchFailed(ctx context.Context, err error) error {
+	slog.ErrorContext(ctx, "fetch failed", "err", err)
+	return ErrFetchFailed
+}
 
 func StatusFromErr(err error) int {
 	switch {

@@ -23,7 +23,7 @@ func NewService(scraper *scraper.Scraper, repo Repository, rs *redsync.Redsync) 
 func (s Service) GetFields(ctx context.Context) (map[string]string, error) {
 	f, ok, err := s.repo.GetFields(ctx)
 	if err != nil {
-		return nil, errs.ErrFetchFailed
+		return nil, errs.FetchFailed(ctx, err)
 	}
 	if ok {
 		return f, nil
@@ -33,7 +33,7 @@ func (s Service) GetFields(ctx context.Context) (map[string]string, error) {
 	if err := s.withLock(ctx, "lock:fields", func() error {
 		cached, ok, err := s.repo.GetFields(ctx)
 		if err != nil {
-			return errs.ErrFetchFailed
+			return errs.FetchFailed(ctx, err)
 		}
 		if ok {
 			result = cached
@@ -41,7 +41,7 @@ func (s Service) GetFields(ctx context.Context) (map[string]string, error) {
 		}
 		result, err = s.scraper.GetFields(scraper.FieldsURL)
 		if err != nil {
-			return errs.ErrFetchFailed
+			return errs.FetchFailed(ctx, err)
 		}
 		if len(result) == 0 {
 			return errs.ErrNotFound
@@ -57,7 +57,7 @@ func (s Service) GetFields(ctx context.Context) (map[string]string, error) {
 func (s Service) GetGroups(ctx context.Context, fieldsID string) (map[string]string, error) {
 	g, ok, err := s.repo.GetGroups(ctx, fieldsID)
 	if err != nil {
-		return nil, errs.ErrFetchFailed
+		return nil, errs.FetchFailed(ctx, err)
 	}
 	if ok {
 		return g, nil
@@ -67,7 +67,7 @@ func (s Service) GetGroups(ctx context.Context, fieldsID string) (map[string]str
 	if err := s.withLock(ctx, "lock:group:"+fieldsID, func() error {
 		cached, ok, err := s.repo.GetGroups(ctx, fieldsID)
 		if err != nil {
-			return errs.ErrFetchFailed
+			return errs.FetchFailed(ctx, err)
 		}
 		if ok {
 			result = cached
@@ -75,7 +75,7 @@ func (s Service) GetGroups(ctx context.Context, fieldsID string) (map[string]str
 		}
 		result, err = s.scraper.GetGroupsFromID(scraper.GroupsURL, fieldsID)
 		if err != nil {
-			return errs.ErrFetchFailed
+			return errs.FetchFailed(ctx, err)
 		}
 		if len(result) == 0 {
 			return errs.ErrNotFound
@@ -91,7 +91,7 @@ func (s Service) GetGroups(ctx context.Context, fieldsID string) (map[string]str
 func (s Service) getSchedule(ctx context.Context, groupID string) ([]model.Entry, error) {
 	sh, ok, err := s.repo.GetSchedule(ctx, groupID)
 	if err != nil {
-		return nil, errs.ErrFetchFailed
+		return nil, errs.FetchFailed(ctx, err)
 	}
 	if ok {
 		return sh, nil
@@ -101,7 +101,7 @@ func (s Service) getSchedule(ctx context.Context, groupID string) ([]model.Entry
 	if err := s.withLock(ctx, "lock:schedule:"+groupID, func() error {
 		cached, ok, err := s.repo.GetSchedule(ctx, groupID)
 		if err != nil {
-			return errs.ErrFetchFailed
+			return errs.FetchFailed(ctx, err)
 		}
 		if ok {
 			result = cached
@@ -109,7 +109,7 @@ func (s Service) getSchedule(ctx context.Context, groupID string) ([]model.Entry
 		}
 		result, err = s.scraper.GetScheduleForID(scraper.ScheduleURL, groupID)
 		if err != nil {
-			return errs.ErrFetchFailed
+			return errs.FetchFailed(ctx, err)
 		}
 		if len(result) == 0 {
 			return errs.ErrNotFound
@@ -125,7 +125,7 @@ func (s Service) getSchedule(ctx context.Context, groupID string) ([]model.Entry
 func (s Service) GetFilteredSchedule(ctx context.Context, groupID string, f model.Filter) ([]model.Entry, error) {
 	entries, err := s.getSchedule(ctx, groupID)
 	if err != nil {
-		return nil, errs.ErrFetchFailed
+		return nil, err
 	}
 
 	var filtered = model.FilterEntries(
@@ -139,7 +139,7 @@ func (s Service) GetFilteredSchedule(ctx context.Context, groupID string, f mode
 func (s Service) withLock(ctx context.Context, key string, fn func() error) error {
 	mu := s.rs.NewMutex(key)
 	if err := mu.LockContext(ctx); err != nil {
-		return errs.ErrFetchFailed
+		return errs.FetchFailed(ctx, err)
 	}
 	defer func() {
 		if _, err := mu.UnlockContext(ctx); err != nil {
