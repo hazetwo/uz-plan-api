@@ -2,6 +2,7 @@ package schedule
 
 import (
 	"net/http"
+	"regexp"
 	"strings"
 	"uz-plan-api/internal/errs"
 	"uz-plan-api/internal/model"
@@ -101,8 +102,10 @@ func (h Handler) checkRateLimit(w http.ResponseWriter, r *http.Request) bool {
 	return false
 }
 
+var validID = regexp.MustCompile(`^-?\d+$`)
+
 func (h Handler) isID(w http.ResponseWriter, r *http.Request, id string) bool {
-	if id == "" {
+	if id == "" || !validID.MatchString(id) {
 		render.Status(r, http.StatusBadRequest)
 		render.JSON(w, r, ErrorResponse{Error: "id is required"})
 		return false
