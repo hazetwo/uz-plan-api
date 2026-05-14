@@ -56,7 +56,7 @@ func main() {
 	if env == "" {
 		env = "dev"
 	}
-	
+
 	switch env {
 	case "prod", "production":
 		// skip registering the docs route
