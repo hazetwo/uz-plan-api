@@ -39,7 +39,7 @@ func main() {
 
 	slog.Info("Connected to Redis")
 
-	rl := ratelimiter.New(rate.Limit(10), 20)
+	rl := ratelimiter.New(rate.Limit(5), 10)
 
 	scr := scraper.New()
 	repo, rs := database.New(rdb)
