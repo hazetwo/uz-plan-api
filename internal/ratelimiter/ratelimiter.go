@@ -9,9 +9,18 @@ import (
 	"golang.org/x/time/rate"
 )
 
+const (
+	violationThreshold = 10
+	violationWindow    = time.Minute
+	banDuration        = 5 * time.Minute
+)
+
 type visitor struct {
-	limiter  *rate.Limiter
-	lastSeen time.Time
+	limiter     *rate.Limiter
+	lastSeen    time.Time
+	violations  int
+	windowStart time.Time
+	bannedUntil time.Time
 }
 
 type RateLimiter struct {
@@ -31,17 +40,39 @@ func New(r rate.Limit, b int) *RateLimiter {
 	return rl
 }
 
-func (rl *RateLimiter) get(ip string) *rate.Limiter {
+func (rl *RateLimiter) allow(ip string) bool {
 	rl.mu.Lock()
 	defer rl.mu.Unlock()
 
 	v, ok := rl.visitors[ip]
 	if !ok {
-		v = &visitor{limiter: rate.NewLimiter(rl.rate, rl.bucket)}
+		v = &visitor{
+			limiter:     rate.NewLimiter(rl.rate, rl.bucket),
+			windowStart: time.Now(),
+		}
 		rl.visitors[ip] = v
 	}
 	v.lastSeen = time.Now()
-	return v.limiter
+
+	if time.Now().Before(v.bannedUntil) {
+		return false
+	}
+
+	if time.Since(v.windowStart) > violationWindow {
+		v.violations = 0
+		v.windowStart = time.Now()
+	}
+
+	if !v.limiter.Allow() {
+		v.violations++
+		if v.violations >= violationThreshold {
+			v.bannedUntil = time.Now().Add(banDuration)
+			v.violations = 0
+		}
+		return false
+	}
+
+	return true
 }
 
 func (rl *RateLimiter) cleanup() {
@@ -57,10 +88,17 @@ func (rl *RateLimiter) cleanup() {
 	}
 }
 
+func realIP(r *http.Request) string {
+	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+		return xff
+	}
+	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
+	return ip
+}
+
 func (rl *RateLimiter) LimitMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ip, _, _ := net.SplitHostPort(r.RemoteAddr)
-		if !rl.get(ip).Allow() {
+		if !rl.allow(realIP(r)) {
 			http.Error(w, "too many requests", http.StatusTooManyRequests)
 			return
 		}
