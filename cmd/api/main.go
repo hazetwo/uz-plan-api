@@ -49,7 +49,10 @@ func main() {
 	r.Use(rl.LimitMiddleware)
 
 	env := os.Getenv("APP_ENV")
-
+	if env == "" {
+		env = "dev"
+	}
+	
 	switch env {
 	case "prod", "production":
 		// skip registering the docs route
