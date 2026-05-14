@@ -79,7 +79,10 @@ func (s Scraper) GetFields(site string) (map[string]string, error) {
 	return f, nil
 }
 
-func (s Scraper) GetGroupsFromID(site string, id string) (map[string]string, error) {
+func (s Scraper) GetGroupsFromID(site string, id string, allowedIds map[string]string) (map[string]string, error) {
+	if _, ok := allowedIds[id]; !ok {
+		return nil, fmt.Errorf("provided is is not on the allowed list")
+	}
 	g := make(map[string]string)
 
 	u, err := getURLWithID(site, id)

@@ -73,7 +73,11 @@ func (s Service) GetGroups(ctx context.Context, fieldsID string) (map[string]str
 			result = cached
 			return nil
 		}
-		result, err = s.scraper.GetGroupsFromID(scraper.GroupsURL, fieldsID)
+		ids, err := s.GetFields(ctx)
+		if err != nil {
+			return err
+		}
+		result, err = s.scraper.GetGroupsFromID(scraper.GroupsURL, fieldsID, ids)
 		if err != nil {
 			return errs.FetchFailed(ctx, err)
 		}
