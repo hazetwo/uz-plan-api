@@ -6,8 +6,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-chi/render"
 	"golang.org/x/time/rate"
 )
+
+type errorResponse struct {
+	Error string `json:"error"`
+}
 
 const (
 	violationThreshold = 10
@@ -99,7 +104,8 @@ func realIP(r *http.Request) string {
 func (rl *RateLimiter) LimitMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !rl.allow(realIP(r)) {
-			http.Error(w, "too many requests", http.StatusTooManyRequests)
+			render.Status(r, http.StatusTooManyRequests)
+			render.JSON(w, r, errorResponse{Error: "too many requests"})
 			return
 		}
 		next.ServeHTTP(w, r)
