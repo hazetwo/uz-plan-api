@@ -12,6 +12,7 @@ import (
 	"time"
 	"uz-plan-api/docs"
 	"uz-plan-api/internal/database"
+	"uz-plan-api/internal/ratelimiter"
 	"uz-plan-api/internal/schedule"
 	"uz-plan-api/internal/scraper"
 
@@ -38,12 +39,14 @@ func main() {
 
 	slog.Info("Connected to Redis")
 
-	limiter := rate.NewLimiter(rate.Limit(10), 20)
+	rl := ratelimiter.New(rate.Limit(10), 20)
 
 	scr := scraper.New()
 	repo, rs := database.New(rdb)
 	svc := schedule.NewService(scr, repo, rs)
-	h := schedule.NewHandler(svc, limiter)
+	h := schedule.NewHandler(svc)
+
+	r.Use(rl.LimitMiddleware)
 
 	env := os.Getenv("APP_ENV")
 

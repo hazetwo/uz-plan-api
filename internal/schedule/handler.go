@@ -9,7 +9,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"golang.org/x/time/rate"
 )
 
 type ErrorResponse struct {
@@ -18,18 +17,13 @@ type ErrorResponse struct {
 
 type Handler struct {
 	service *Service
-	limiter *rate.Limiter
 }
 
-func NewHandler(service *Service, limiter *rate.Limiter) *Handler {
-	return &Handler{service: service, limiter: limiter}
+func NewHandler(service *Service) *Handler {
+	return &Handler{service: service}
 }
 
 func (h Handler) GetFields(w http.ResponseWriter, r *http.Request) {
-	if !h.checkRateLimit(w, r) {
-		return
-	}
-
 	f, err := h.service.GetFields(r.Context())
 	if err != nil {
 		render.Status(r, errs.StatusFromErr(err))
@@ -41,10 +35,6 @@ func (h Handler) GetFields(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) GetGroupsFromID(w http.ResponseWriter, r *http.Request) {
-	if !h.checkRateLimit(w, r) {
-		return
-	}
-
 	id := chi.URLParam(r, "id")
 	if !h.isID(w, r, id) {
 		return
@@ -61,10 +51,6 @@ func (h Handler) GetGroupsFromID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) GetScheduleFromID(w http.ResponseWriter, r *http.Request) {
-	if !h.checkRateLimit(w, r) {
-		return
-	}
-
 	id := chi.URLParam(r, "id")
 	if !h.isID(w, r, id) {
 		return
@@ -91,15 +77,6 @@ func (h Handler) GetScheduleFromID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.JSON(w, r, s)
-}
-
-func (h Handler) checkRateLimit(w http.ResponseWriter, r *http.Request) bool {
-	if h.limiter.Allow() {
-		return true
-	}
-	render.Status(r, http.StatusTooManyRequests)
-	render.JSON(w, r, ErrorResponse{Error: errs.ErrTooManyReq.Error()})
-	return false
 }
 
 var validID = regexp.MustCompile(`^-?\d+$`)
