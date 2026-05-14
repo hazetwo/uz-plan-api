@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 	"uz-plan-api/internal/errs"
 	"uz-plan-api/internal/model"
 
@@ -59,9 +60,17 @@ func (h Handler) GetScheduleFromID(w http.ResponseWriter, r *http.Request) {
 	f := model.Filter{}
 
 	if d := r.URL.Query().Get("day"); d != "" {
-		f.Day = &d
+		if d == "today" {
+			f.Day = new(time.Now().Format("2006-01-02"))
+		} else {
+			f.Day = &d
+		}
 	} else if w := r.URL.Query().Get("week"); w != "" {
-		f.Week = &w
+		if w == "today" {
+			f.Week = new(time.Now().Format("2006-01-02"))
+		} else {
+			f.Week = &w
+		}
 	}
 
 	if sg := r.URL.Query().Get("subgroup"); sg != "" {
