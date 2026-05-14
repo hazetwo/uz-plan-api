@@ -48,6 +48,10 @@ func main() {
 
 	r.Use(rl.LimitMiddleware)
 
+	r.Get("/health", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
 	env := os.Getenv("APP_ENV")
 	if env == "" {
 		env = "dev"
