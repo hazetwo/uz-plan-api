@@ -20,7 +20,7 @@ func NewService(scraper *scraper.Scraper, repo Repository, rs *redsync.Redsync) 
 	return &Service{scraper: scraper, repo: repo, rs: rs}
 }
 
-func (s Service) GetFields(ctx context.Context) (map[string]string, error) {
+func (s Service) GetFields(ctx context.Context) (model.Fields, error) {
 	f, ok, err := s.repo.GetFields(ctx)
 	if err != nil {
 		return nil, errs.FetchFailed(ctx, err)
@@ -54,7 +54,7 @@ func (s Service) GetFields(ctx context.Context) (map[string]string, error) {
 	return result, nil
 }
 
-func (s Service) GetGroups(ctx context.Context, fieldsID string) (map[string]string, error) {
+func (s Service) GetGroups(ctx context.Context, fieldsID string) (model.Groups, error) {
 	g, ok, err := s.repo.GetGroups(ctx, fieldsID)
 	if err != nil {
 		return nil, errs.FetchFailed(ctx, err)

@@ -93,29 +93,9 @@ components:
   schemas:
     Subgroup:
       type: string
-      enum: [A, B]
+      enum: [ A, B ]
     Entry:
       type: object
-      properties:
-        subgroup:
-          oneOf:
-            - $ref: "#/components/schemas/Subgroup"
-            - type: "null"
-        start:
-          type: [string, "null"]
-        end:
-          type: [string, "null"]
-        date:
-          type: [string, "null"]
-          format: date
-        subject:
-          type: [string, "null"]
-        classType:
-          type: [string, "null"]
-        teacher:
-          type: [string, "null"]
-        classroom:
-          type: [string, "null"]
     ErrorResponse:
       type: object
       properties:

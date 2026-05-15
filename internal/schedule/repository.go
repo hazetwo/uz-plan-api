@@ -7,13 +7,13 @@ import (
 )
 
 type Repository interface {
-	GetFields(ctx context.Context) (map[string]string, bool, error)
-	StoreFields(ctx context.Context, fields map[string]string) error
+	GetFields(ctx context.Context) (model.Fields, database.Cached, error)
+	StoreFields(ctx context.Context, fields model.Fields) error
 
-	GetGroups(ctx context.Context, fieldID string) (map[string]string, bool, error)
-	StoreGroups(ctx context.Context, fieldID string, groups map[string]string) error
+	GetGroups(ctx context.Context, fieldID string) (model.Groups, database.Cached, error)
+	StoreGroups(ctx context.Context, fieldID string, groups model.Groups) error
 
-	GetSchedule(ctx context.Context, groupID string) ([]model.Entry, bool, error)
+	GetSchedule(ctx context.Context, groupID string) ([]model.Entry, database.Cached, error)
 	StoreSchedule(ctx context.Context, groupID string, entries []model.Entry) error
 }
 

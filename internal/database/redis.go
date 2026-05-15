@@ -16,12 +16,14 @@ type RedisRepository struct {
 	rdb *redis.Client
 }
 
+type Cached bool
+
 func New(rdb *redis.Client) (*RedisRepository, *redsync.Redsync) {
 	pool := goredis.NewPool(rdb)
 	return &RedisRepository{rdb: rdb}, redsync.New(pool)
 }
 
-func (r RedisRepository) GetFields(ctx context.Context) (map[string]string, bool, error) {
+func (r RedisRepository) GetFields(ctx context.Context) (model.Fields, Cached, error) {
 	fields, err := r.rdb.HGetAll(ctx, "fields").Result()
 	if err != nil {
 		return nil, false, err
@@ -33,7 +35,7 @@ func (r RedisRepository) GetFields(ctx context.Context) (map[string]string, bool
 	return fields, true, nil
 }
 
-func (r RedisRepository) StoreFields(ctx context.Context, fields map[string]string) error {
+func (r RedisRepository) StoreFields(ctx context.Context, fields model.Fields) error {
 	pipe := r.rdb.Pipeline()
 	pipe.HSet(ctx, "fields", fields)
 	pipe.Expire(ctx, "fields", 24*time.Hour)
@@ -44,7 +46,7 @@ func (r RedisRepository) StoreFields(ctx context.Context, fields map[string]stri
 	return nil
 }
 
-func (r RedisRepository) GetGroups(ctx context.Context, fieldID string) (map[string]string, bool, error) {
+func (r RedisRepository) GetGroups(ctx context.Context, fieldID string) (model.Groups, Cached, error) {
 	g, err := r.rdb.HGetAll(ctx, "groups:"+fieldID).Result()
 	if err != nil {
 		return nil, false, err
@@ -56,7 +58,7 @@ func (r RedisRepository) GetGroups(ctx context.Context, fieldID string) (map[str
 	return g, true, nil
 }
 
-func (r RedisRepository) StoreGroups(ctx context.Context, fieldID string, groups map[string]string) error {
+func (r RedisRepository) StoreGroups(ctx context.Context, fieldID string, groups model.Groups) error {
 	p := r.rdb.Pipeline()
 	p.HSet(ctx, "groups:"+fieldID, groups)
 	p.Expire(ctx, "groups:"+fieldID, 24*time.Hour)
@@ -67,7 +69,7 @@ func (r RedisRepository) StoreGroups(ctx context.Context, fieldID string, groups
 	return nil
 }
 
-func (r RedisRepository) GetSchedule(ctx context.Context, groupID string) ([]model.Entry, bool, error) {
+func (r RedisRepository) GetSchedule(ctx context.Context, groupID string) ([]model.Entry, Cached, error) {
 	data, err := r.rdb.Get(ctx, "schedule:"+groupID).Bytes()
 	if errors.Is(err, redis.Nil) {
 		return nil, false, nil
