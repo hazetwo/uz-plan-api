@@ -1,7 +1,7 @@
 APP := ./cmd/api
 BIN := ./bin/app
 
-.PHONY: build run test clean
+.PHONY: build run test clean redis-start
 
 build:
 	go build -o $(BIN) $(APP)
@@ -22,11 +22,6 @@ clean:
 	rm -rf ./bin ./api
 	rm -rf ./tmp
 
-build-mac:
-	GOARCH=arm64 GOOS=darwin go build -o ./bin/app-macos $(APP)
-
-start-redis:
+redis-start:
 	docker compose up redis
 
-stop-redis:
-	docker compose down redis
