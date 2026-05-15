@@ -36,11 +36,11 @@ type RateLimiter struct {
 	bucket   int
 }
 
-func New(r rate.Limit, b int) *RateLimiter {
+func New(rate rate.Limit, bucket int) *RateLimiter {
 	rl := &RateLimiter{
 		visitors: make(map[string]*visitor),
-		rate:     r,
-		bucket:   b,
+		rate:     rate,
+		bucket:   bucket,
 	}
 	go rl.cleanup()
 	return rl
