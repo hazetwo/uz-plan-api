@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sync"
 	"time"
+	"uz-plan-api/internal/errs"
 
 	"github.com/go-chi/render"
 	"golang.org/x/time/rate"
@@ -105,7 +106,7 @@ func (rl *RateLimiter) LimitMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !rl.allow(realIP(r)) {
 			render.Status(r, http.StatusTooManyRequests)
-			render.JSON(w, r, errorResponse{Error: "too many requests"})
+			render.JSON(w, r, errorResponse{Error: errs.ErrTooManyReq.Error()})
 			return
 		}
 		next.ServeHTTP(w, r)
