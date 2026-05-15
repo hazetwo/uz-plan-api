@@ -37,7 +37,7 @@ func (r RedisRepository) GetFields(ctx context.Context) (model.Fields, Cached, e
 
 func (r RedisRepository) StoreFields(ctx context.Context, fields model.Fields) error {
 	pipe := r.rdb.Pipeline()
-	pipe.HSet(ctx, "fields", fields)
+	pipe.HSet(ctx, "fields", map[string]string(fields))
 	pipe.Expire(ctx, "fields", 24*time.Hour)
 	if _, err := pipe.Exec(ctx); err != nil {
 		return err
@@ -60,7 +60,7 @@ func (r RedisRepository) GetGroups(ctx context.Context, fieldID string) (model.G
 
 func (r RedisRepository) StoreGroups(ctx context.Context, fieldID string, groups model.Groups) error {
 	p := r.rdb.Pipeline()
-	p.HSet(ctx, "groups:"+fieldID, groups)
+	p.HSet(ctx, "groups:"+fieldID, map[string]string(groups))
 	p.Expire(ctx, "groups:"+fieldID, 24*time.Hour)
 	if _, err := p.Exec(ctx); err != nil {
 		return err
