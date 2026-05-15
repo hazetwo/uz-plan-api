@@ -30,49 +30,50 @@ type visitor struct {
 }
 
 type RateLimiter struct {
-	mu       sync.Mutex
-	visitors map[string]*visitor
-	rate     rate.Limit
-	bucket   int
+	mu        sync.Mutex
+	visitors  map[string]*visitor
+	rateLimit rate.Limit
+	bucket    int
 }
 
-func New(rate rate.Limit, bucket int) *RateLimiter {
+func New(rateLimit rate.Limit, bucket int) *RateLimiter {
 	rl := &RateLimiter{
-		visitors: make(map[string]*visitor),
-		rate:     rate,
-		bucket:   bucket,
+		visitors:  make(map[string]*visitor),
+		rateLimit: rateLimit,
+		bucket:    bucket,
 	}
 	go rl.cleanup()
 	return rl
 }
 
 func (rl *RateLimiter) allow(ip string) bool {
+	now := time.Now()
 	rl.mu.Lock()
 	defer rl.mu.Unlock()
 
 	v, ok := rl.visitors[ip]
 	if !ok {
 		v = &visitor{
-			limiter:     rate.NewLimiter(rl.rate, rl.bucket),
-			windowStart: time.Now(),
+			limiter:     rate.NewLimiter(rl.rateLimit, rl.bucket),
+			windowStart: now,
 		}
 		rl.visitors[ip] = v
 	}
-	v.lastSeen = time.Now()
+	v.lastSeen = now
 
-	if time.Now().Before(v.bannedUntil) {
+	if now.Before(v.bannedUntil) {
 		return false
 	}
 
 	if time.Since(v.windowStart) > violationWindow {
 		v.violations = 0
-		v.windowStart = time.Now()
+		v.windowStart = now
 	}
 
 	if !v.limiter.Allow() {
 		v.violations++
 		if v.violations >= violationThreshold {
-			v.bannedUntil = time.Now().Add(banDuration)
+			v.bannedUntil = now.Add(banDuration)
 			v.violations = 0
 		}
 		return false
@@ -82,11 +83,12 @@ func (rl *RateLimiter) allow(ip string) bool {
 }
 
 func (rl *RateLimiter) cleanup() {
-	for {
-		time.Sleep(time.Minute)
+	ticker := time.NewTicker(time.Minute)
+	defer ticker.Stop()
+	for range ticker.C {
 		rl.mu.Lock()
 		for ip, v := range rl.visitors {
-			if time.Since(v.lastSeen) > 3*time.Minute {
+			if time.Since(v.lastSeen) > banDuration+time.Minute {
 				delete(rl.visitors, ip)
 			}
 		}
@@ -95,10 +97,14 @@ func (rl *RateLimiter) cleanup() {
 }
 
 func realIP(r *http.Request) string {
-	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
-		return xff
+	// Railway sets X-Real-IP directly so we can use it
+	if ip := r.Header.Get("X-Real-IP"); ip != "" {
+		return ip
 	}
-	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
+	ip, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return r.RemoteAddr
+	}
 	return ip
 }
 
