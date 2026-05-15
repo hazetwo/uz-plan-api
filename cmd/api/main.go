@@ -17,7 +17,6 @@ import (
 	"uz-plan-api/internal/scraper"
 
 	"github.com/go-chi/chi/v5"
-	"golang.org/x/time/rate"
 )
 
 func main() {
@@ -39,7 +38,15 @@ func main() {
 
 	slog.Info("Connected to Redis")
 
-	rl := ratelimiter.New(rate.Limit(5), 10)
+	rl := ratelimiter.New(
+		ratelimiter.Options{
+			RateLimit:          10,
+			Bucket:             20,
+			ViolationThreshold: 10,
+			ViolationWindow:    time.Minute,
+			BanDuration:        5 * time.Minute,
+		},
+	)
 
 	scr := scraper.New()
 	repo, rs := database.New(rdb)

@@ -15,12 +15,6 @@ type errorResponse struct {
 	Error string `json:"error"`
 }
 
-const (
-	violationThreshold = 10
-	violationWindow    = time.Minute
-	banDuration        = 5 * time.Minute
-)
-
 type visitor struct {
 	limiter     *rate.Limiter
 	lastSeen    time.Time
@@ -29,18 +23,27 @@ type visitor struct {
 	bannedUntil time.Time
 }
 
-type RateLimiter struct {
-	mu        sync.Mutex
-	visitors  map[string]*visitor
-	rateLimit rate.Limit
-	bucket    int
+type Options struct {
+	RateLimit          int
+	Bucket             int
+	ViolationThreshold int
+	ViolationWindow    time.Duration
+	BanDuration        time.Duration
 }
 
-func New(rateLimit rate.Limit, bucket int) *RateLimiter {
+type RateLimiter struct {
+	mu        sync.Mutex
+	rateLimit rate.Limit
+	visitors  map[string]*visitor
+	bucket    int
+	options   Options
+}
+
+func New(options Options) *RateLimiter {
 	rl := &RateLimiter{
 		visitors:  make(map[string]*visitor),
-		rateLimit: rateLimit,
-		bucket:    bucket,
+		rateLimit: rate.Limit(options.RateLimit),
+		options:   options,
 	}
 	go rl.cleanup()
 	return rl
@@ -54,7 +57,7 @@ func (rl *RateLimiter) allow(ip string) bool {
 	v, ok := rl.visitors[ip]
 	if !ok {
 		v = &visitor{
-			limiter:     rate.NewLimiter(rl.rateLimit, rl.bucket),
+			limiter:     rate.NewLimiter(rl.rateLimit, rl.options.Bucket),
 			windowStart: now,
 		}
 		rl.visitors[ip] = v
@@ -65,15 +68,15 @@ func (rl *RateLimiter) allow(ip string) bool {
 		return false
 	}
 
-	if time.Since(v.windowStart) > violationWindow {
+	if time.Since(v.windowStart) > rl.options.ViolationWindow {
 		v.violations = 0
 		v.windowStart = now
 	}
 
 	if !v.limiter.Allow() {
 		v.violations++
-		if v.violations >= violationThreshold {
-			v.bannedUntil = now.Add(banDuration)
+		if v.violations >= rl.options.ViolationThreshold {
+			v.bannedUntil = now.Add(rl.options.BanDuration)
 			v.violations = 0
 		}
 		return false
@@ -88,7 +91,7 @@ func (rl *RateLimiter) cleanup() {
 	for range ticker.C {
 		rl.mu.Lock()
 		for ip, v := range rl.visitors {
-			if time.Since(v.lastSeen) > banDuration+time.Minute {
+			if time.Since(v.lastSeen) > rl.options.BanDuration+time.Minute {
 				delete(rl.visitors, ip)
 			}
 		}
