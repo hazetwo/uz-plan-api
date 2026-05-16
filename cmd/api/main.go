@@ -24,6 +24,18 @@ func main() {
 
 	r := chi.NewRouter()
 
+	origins := os.Getenv("ALLOWED_ORIGINS")
+	if origins == "" {
+		origins = "http://localhost:5173"
+	}
+	allowedOrigins := strings.Split(origins, ",")
+
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins: allowedOrigins,
+		AllowedMethods: []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders: []string{"Content-Type"},
+	}))
+
 	rdb, err := database.Connect(ctx)
 	if err != nil {
 		slog.Error("Failed to connect to Redis", "err", err)
