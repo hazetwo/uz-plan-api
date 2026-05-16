@@ -22,7 +22,13 @@ func New() *Scraper {
 }
 
 func (s Scraper) getDocument(site string) (*goquery.Document, error) {
-	res, err := s.client.Get(site)
+	req, err := http.NewRequest(http.MethodGet, site, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "better-uz-plan/1.0 (https://github.com/haze/better-uz-plan)")
+
+	res, err := s.client.Do(req)
 	if err != nil {
 		return nil, err
 	}
