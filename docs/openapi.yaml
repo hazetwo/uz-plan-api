@@ -10,13 +10,13 @@ paths:
       summary: List study fields
       responses:
         "200":
-          description: OK
+          description: OK — map of field ID to field object
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: string
+                type: object
+                additionalProperties:
+                  $ref: "#/components/schemas/Field"
         "429":
           $ref: "#/components/responses/TooManyRequests"
         "500":
@@ -28,16 +28,17 @@ paths:
         - name: id
           in: path
           required: true
+          description: Field ID (numeric, may be negative)
           schema:
             type: string
       responses:
         "200":
-          description: OK
+          description: OK — map of group ID to group name
           content:
             application/json:
               schema:
-                type: array
-                items:
+                type: object
+                additionalProperties:
                   type: string
         "400":
           $ref: "#/components/responses/BadRequest"
@@ -54,22 +55,22 @@ paths:
         - name: id
           in: path
           required: true
+          description: Group ID (numeric, may be negative)
           schema:
             type: string
         - name: day
           in: query
+          description: Filter by a specific day — ISO 8601 date (e.g. 2024-10-07) or "today"
           schema:
             type: string
-            format: date
-          description: Filter by a specific day (ISO 8601, e.g. 2024-10-07)
         - name: week
           in: query
+          description: Filter by the week containing this date — ISO 8601 date or "today"
           schema:
             type: string
-            format: date
-          description: Filter by the week containing this date
         - name: subgroup
           in: query
+          description: Filter by subgroup (case-insensitive)
           schema:
             $ref: "#/components/schemas/Subgroup"
       responses:
@@ -93,9 +94,43 @@ components:
   schemas:
     Subgroup:
       type: string
-      enum: [ A, B ]
+      enum: [A, B]
+    Field:
+      type: object
+      required: [faculty, name]
+      properties:
+        faculty:
+          type: string
+        name:
+          type: string
     Entry:
       type: object
+      properties:
+        subgroup:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/Subgroup"
+        start:
+          type: string
+          nullable: true
+        end:
+          type: string
+          nullable: true
+        date:
+          type: string
+          nullable: true
+        subject:
+          type: string
+          nullable: true
+        classType:
+          type: string
+          nullable: true
+        teacher:
+          type: string
+          nullable: true
+        classroom:
+          type: string
+          nullable: true
     ErrorResponse:
       type: object
       properties:

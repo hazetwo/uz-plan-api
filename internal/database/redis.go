@@ -24,26 +24,27 @@ func New(rdb *redis.Client) (*RedisRepository, *redsync.Redsync) {
 }
 
 func (r RedisRepository) GetFields(ctx context.Context) (model.Fields, Cached, error) {
-	fields, err := r.rdb.HGetAll(ctx, "fields").Result()
+	data, err := r.rdb.Get(ctx, "fields").Bytes()
+	if errors.Is(err, redis.Nil) {
+		return nil, false, nil
+	}
 	if err != nil {
 		return nil, false, err
 	}
-	if len(fields) == 0 {
-		return nil, false, nil
+	var fields model.Fields
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return nil, false, err
 	}
 
 	return fields, true, nil
 }
 
 func (r RedisRepository) StoreFields(ctx context.Context, fields model.Fields) error {
-	pipe := r.rdb.Pipeline()
-	pipe.HSet(ctx, "fields", map[string]string(fields))
-	pipe.Expire(ctx, "fields", 24*time.Hour)
-	if _, err := pipe.Exec(ctx); err != nil {
+	data, err := json.Marshal(fields)
+	if err != nil {
 		return err
 	}
-
-	return nil
+	return r.rdb.Set(ctx, "fields", data, 24*time.Hour).Err()
 }
 
 func (r RedisRepository) GetGroups(ctx context.Context, fieldID string) (model.Groups, Cached, error) {

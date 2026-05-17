@@ -27,6 +27,10 @@ type Entry struct {
 	Classroom *string   `json:"classroom"`
 }
 
-type Fields map[string]string
+type Field struct {
+	Faculty string `json:"faculty"`
+	Name    string `json:"name"`
+}
 
+type Fields map[string]Field
 type Groups map[string]string

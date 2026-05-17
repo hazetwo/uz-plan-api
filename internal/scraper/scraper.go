@@ -63,32 +63,36 @@ func getURLWithID(site string, id string) (string, error) {
 	return u.String(), nil
 }
 
-func (s Scraper) GetFields(site string) (map[string]string, error) {
-	f := make(map[string]string)
+func (s Scraper) GetFields(site string) (model.Fields, error) {
+	fields := make(model.Fields)
 
 	doc, err := s.getDocument(site)
 	if err != nil {
 		return nil, err
 	}
 
-	doc.Find("ul.lista-grup a[href]").Each(func(i int, s *goquery.Selection) {
-		l, _ := s.Attr("href")
-		n := s.Text()
-		u, err := url.Parse(l)
-		if err != nil {
-			return
-		}
-		id := u.Query().Get("ID")
-		f[id] = n
+	doc.Find("li.lista-grup-item:has(ul.lista-grup)").Each(func(i int, li *goquery.Selection) {
+		f := strings.TrimSpace(li.Contents().First().Text())
+
+		li.Find("ul.lista-grup li a").Each(func(j int, a *goquery.Selection) {
+			l, _ := a.Attr("href")
+			n := strings.TrimSpace(a.Text())
+			u, err := url.Parse(l)
+			if err != nil {
+				return
+			}
+			id := u.Query().Get("ID")
+			fields[id] = model.Field{
+				Faculty: f,
+				Name:    n,
+			}
+		})
 	})
 
-	return f, nil
+	return fields, nil
 }
 
-func (s Scraper) GetGroupsFromID(site string, id string, allowedIds map[string]string) (map[string]string, error) {
-	if _, ok := allowedIds[id]; !ok {
-		return nil, fmt.Errorf("provided is is not on the allowed list")
-	}
+func (s Scraper) GetGroupsFromID(site string, id string) (map[string]string, error) {
 	g := make(map[string]string)
 
 	u, err := getURLWithID(site, id)

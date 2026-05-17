@@ -29,7 +29,7 @@ func (s Service) GetFields(ctx context.Context) (model.Fields, error) {
 		return f, nil
 	}
 
-	var result map[string]string
+	var result model.Fields
 	if err := s.withLock(ctx, "lock:fields", func() error {
 		cached, ok, err := s.repo.GetFields(ctx)
 		if err != nil {
@@ -73,11 +73,7 @@ func (s Service) GetGroups(ctx context.Context, fieldsID string) (model.Groups, 
 			result = cached
 			return nil
 		}
-		ids, err := s.GetFields(ctx)
-		if err != nil {
-			return err
-		}
-		result, err = s.scraper.GetGroupsFromID(scraper.GroupsURL, fieldsID, ids)
+		result, err = s.scraper.GetGroupsFromID(scraper.GroupsURL, fieldsID)
 		if err != nil {
 			return errs.FetchFailed(ctx, err)
 		}
