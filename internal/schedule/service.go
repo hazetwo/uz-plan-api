@@ -3,6 +3,7 @@ package schedule
 import (
 	"context"
 	"log/slog"
+	"time"
 	"uz-plan-api/internal/errs"
 	"uz-plan-api/internal/model"
 	"uz-plan-api/internal/scraper"
@@ -137,7 +138,7 @@ func (s Service) GetFilteredSchedule(ctx context.Context, groupID string, f mode
 }
 
 func (s Service) withLock(ctx context.Context, key string, fn func() error) error {
-	mu := s.rs.NewMutex(key)
+	mu := s.rs.NewMutex(key, redsync.WithExpiry(15*time.Second))
 	if err := mu.LockContext(ctx); err != nil {
 		return errs.FetchFailed(ctx, err)
 	}
