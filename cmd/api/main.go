@@ -32,6 +32,8 @@ func main() {
 	}
 	allowedOrigins := strings.Split(origins, ",")
 
+	slog.Info("allowed origins:", "origins", allowedOrigins)
+
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins: allowedOrigins,
 		AllowedMethods: []string{"GET", "POST", "OPTIONS"},
