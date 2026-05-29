@@ -54,7 +54,7 @@ func main() {
 
 	slog.Info("Connected to Redis")
 
-	rl := ratelimiter.New(
+	rl, err := ratelimiter.New(
 		ratelimiter.Options{
 			RateLimit:          10,
 			Bucket:             20,
@@ -63,6 +63,11 @@ func main() {
 			BanDuration:        5 * time.Minute,
 		},
 	)
+	if err != nil {
+		slog.Error("Failed to create rate limiter", "err", err)
+		os.Exit(1)
+	}
+	defer rl.Stop()
 
 	scr := scraper.New()
 	repo, rs := database.New(rdb)
